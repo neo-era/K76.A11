@@ -74,6 +74,24 @@ function doGet(e) {
       const row = JSON.parse(data);
       return buildResponse(updateRow(row));
     }
+    if (action === 'getGallery') return buildResponse(getTabData('Gallery'));
+    if (action === 'getBooks')   return buildResponse(getTabData('Books'));
+    if (action === 'addGallery') {
+      const data = e.parameter.data || '';
+      if (!data) return buildResponse({ status: 'error', message: 'Thiếu tham số data' });
+      return buildResponse(appendTabRow('Gallery', JSON.parse(data), ['title','desc','url','type','videoId']));
+    }
+    if (action === 'addBook') {
+      const data = e.parameter.data || '';
+      if (!data) return buildResponse({ status: 'error', message: 'Thiếu tham số data' });
+      return buildResponse(appendTabRow('Books', JSON.parse(data), ['title','desc','url','tag','icon']));
+    }
+    if (action === 'deleteGallery' || action === 'deleteBook') {
+      const tab   = action === 'deleteGallery' ? 'Gallery' : 'Books';
+      const index = parseInt(e.parameter.index);
+      if (isNaN(index)) return buildResponse({ status: 'error', message: 'Thiếu index' });
+      return buildResponse(deleteTabRow(tab, index));
+    }
     // Ping / test kết nối
     return buildResponse({ status: 'ok', message: 'K76.A11 Apps Script running' });
   } catch(err) {
@@ -171,6 +189,52 @@ function findCol(headers, aliases) {
 function normalize(s) {
   return String(s || '').toLowerCase().trim()
     .normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function getTabData(tabName) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet()
+          || SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(tabName);
+  if (!sheet) return { status: 'ok', data: [] };
+  const vals = sheet.getDataRange().getValues();
+  if (vals.length < 2) return { status: 'ok', data: [] };
+  const headers = vals[0].map(h => String(h).trim());
+  const data = vals.slice(1)
+    .filter(r => r.some(c => String(c).trim() !== ''))
+    .map(r => {
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = String(r[i] || '').trim(); });
+      return obj;
+    });
+  return { status: 'ok', data };
+}
+
+function appendTabRow(tabName, item, defaultHeaders) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet()
+          || SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sheet = ss.getSheetByName(tabName);
+  if (!sheet) {
+    sheet = ss.insertSheet(tabName);
+    sheet.appendRow(defaultHeaders);
+    sheet.setFrozenRows(1);
+  }
+  const lastCol = Math.max(sheet.getLastColumn(), defaultHeaders.length);
+  const headerRow = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const row = headerRow.map(h => (item[h] !== undefined ? item[h] : ''));
+  sheet.appendRow(row);
+  return { status: 'ok', message: 'Đã thêm thành công' };
+}
+
+function deleteTabRow(tabName, dataIndex) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet()
+          || SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(tabName);
+  if (!sheet) return { status: 'error', message: 'Sheet không tồn tại' };
+  // dataIndex là 0-based trong data rows (row 1 = header)
+  const sheetRow = dataIndex + 2;
+  if (sheetRow > sheet.getLastRow()) return { status: 'error', message: 'Index ngoài phạm vi' };
+  sheet.deleteRow(sheetRow);
+  return { status: 'ok', message: 'Đã xóa' };
 }
 
 function buildRowArray(row, headers) {

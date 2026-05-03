@@ -482,6 +482,17 @@
         }
         .drawer-hdr-title { font-size: 15px; font-weight: 700; color: var(--text); }
         .drawer-body { flex: 1; overflow-y: auto; padding: 14px 16px 32px; }
+        .drawer-add-btn {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: var(--sky); border: none; color: #fff;
+            font-size: 20px; line-height: 1; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s; flex-shrink: 0;
+        }
+        .drawer-add-btn:hover { background: var(--sky-dark); }
+        /* Add item form preview */
+        .url-preview { margin-top: 6px; font-size: 12px; color: var(--sky-dark); min-height: 18px; display: flex; align-items: center; gap: 6px; }
+        .url-preview img { height: 22px; border-radius: 3px; vertical-align: middle; }
 
         /* Gallery */
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 4px; }
@@ -609,9 +620,27 @@
     <div class="drawer-grip"></div>
     <div class="drawer-hdr">
         <span class="drawer-hdr-title" id="drawerTitle"></span>
-        <button class="modal-close" style="background:var(--bg);color:var(--text);border:1px solid var(--border)" onclick="closeDrawer()">✕</button>
+        <div style="display:flex;gap:6px;align-items:center">
+            <button id="drawerAddBtn" class="drawer-add-btn" onclick="openAddItemModal()" title="Thêm mới" style="display:none">＋</button>
+            <button class="modal-close" style="background:var(--bg);color:var(--text);border:1px solid var(--border)" onclick="closeDrawer()">✕</button>
+        </div>
     </div>
     <div id="drawerBody" class="drawer-body"></div>
+</div>
+
+<!-- Add item modal -->
+<div id="addItemModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width:400px">
+        <div class="modal-header">
+            <span id="addItemTitle">Thêm mới</span>
+            <button class="modal-close" onclick="closeAddItemModal()">✕</button>
+        </div>
+        <div class="modal-body" id="addItemBody"></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAddItemModal()">Hủy</button>
+            <button class="btn btn-primary" id="addItemBtn" onclick="submitAddItem()">💾 Lưu lên Google Sheet</button>
+        </div>
+    </div>
 </div>
 
 <!-- Route info bar -->
@@ -771,6 +800,7 @@ let userDotMarker = null;
 let userLatLon = null;
 let routeLayer = null;
 let pendingRouteDest = null;
+let currentDrawerSection = '';
 
 // ── TOAST ──
 let toastTimer;
@@ -1583,13 +1613,8 @@ function clearRoute() {
 
 // ── DRAWER DATA ──
 // Thêm link vào 2 mảng bên dưới để cập nhật nội dung
-const DATA_GALLERY = [
-    // { title: 'Tên album', desc: 'Mô tả', url: 'https://...', type: 'drive|youtube|photo', videoId: 'YOUTUBE_ID' }
-];
-
-const DATA_BOOKS = [
-    // { title: 'Tên sách', desc: 'Mô tả', url: 'https://...', tag: 'Chủ đề', icon: '📗' }
-];
+let DATA_GALLERY = [];
+let DATA_BOOKS = [];
 
 const DATA_HISTORY = [
     { date: '03/05/2026', title: 'Thêm menu Kỷ niệm, Kiến thức, Lịch sử', desc: 'Menu bottom (mobile) và icon top bar (desktop) để truy cập nhanh 3 mục.' },
@@ -1601,6 +1626,7 @@ const DATA_HISTORY = [
 
 // ── DRAWER ──
 function openDrawer(section) {
+    currentDrawerSection = section;
     const cfg = {
         gallery: { title: '📸 Hình ảnh kỷ niệm', render: renderGallery },
         books:   { title: '📚 Kiến thức',         render: renderBooks   },
@@ -1609,12 +1635,139 @@ function openDrawer(section) {
     const c = cfg[section]; if (!c) return;
     document.getElementById('drawerTitle').textContent = c.title;
     document.getElementById('drawerBody').innerHTML = c.render();
+    document.getElementById('drawerAddBtn').style.display = (section !== 'history') ? 'flex' : 'none';
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('drawer').classList.add('open');
 }
 function closeDrawer() {
     document.getElementById('drawerOverlay').classList.remove('open');
     document.getElementById('drawer').classList.remove('open');
+}
+
+// ── ADD ITEM MODAL ──
+function openAddItemModal() {
+    const isGallery = currentDrawerSection === 'gallery';
+    document.getElementById('addItemTitle').textContent = isGallery ? '📸 Thêm ảnh / video' : '📚 Thêm tài liệu';
+    document.getElementById('addItemBody').innerHTML = isGallery ? `
+        <div class="fg">
+            <label>Đường link <span style="color:var(--red)">*</span></label>
+            <input id="aiUrl" type="url" placeholder="https://drive.google.com/... hoặc youtube.com/..." oninput="previewGalleryUrl()">
+            <div id="aiUrlPreview" class="url-preview"></div>
+        </div>
+        <div class="fg">
+            <label>Tiêu đề <span style="color:var(--red)">*</span></label>
+            <input id="aiTitle" type="text" placeholder="VD: Album lễ khai giảng">
+        </div>
+        <div class="fg">
+            <label>Mô tả</label>
+            <input id="aiDesc" type="text" placeholder="VD: Tháng 9/2024">
+        </div>
+        <div id="addItemStatus" class="status-msg"></div>
+    ` : `
+        <div class="fg">
+            <label>Tiêu đề <span style="color:var(--red)">*</span></label>
+            <input id="aiTitle" type="text" placeholder="VD: Giáo trình Triết học Mác-Lênin">
+        </div>
+        <div class="fg">
+            <label>Đường link <span style="color:var(--red)">*</span></label>
+            <input id="aiUrl" type="url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="fg">
+            <label>Mô tả</label>
+            <input id="aiDesc" type="text" placeholder="Mô tả ngắn về tài liệu">
+        </div>
+        <div class="fg">
+            <label>Chủ đề</label>
+            <input id="aiTag" type="text" placeholder="VD: Triết học, Kinh tế, Lịch sử...">
+        </div>
+        <div class="fg">
+            <label>Icon (emoji)</label>
+            <input id="aiIcon" type="text" placeholder="📗" style="max-width:90px">
+        </div>
+        <div id="addItemStatus" class="status-msg"></div>
+    `;
+    const btn = document.getElementById('addItemBtn');
+    btn.disabled = false; btn.textContent = '💾 Lưu lên Google Sheet';
+    document.getElementById('addItemModal').classList.add('open');
+}
+
+function closeAddItemModal() {
+    document.getElementById('addItemModal').classList.remove('open');
+}
+
+function previewGalleryUrl() {
+    const url = (document.getElementById('aiUrl')?.value || '').trim();
+    const el = document.getElementById('aiUrlPreview');
+    if (!el) return;
+    if (!url) { el.innerHTML = ''; return; }
+    try {
+        const m = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
+        if (m) { el.innerHTML = `▶️ YouTube <img src="https://img.youtube.com/vi/${m[1]}/default.jpg" alt="">`; return; }
+        if (url.includes('drive.google.com')) { el.innerHTML = '📂 Google Drive'; return; }
+        if (url.includes('photos.google'))    { el.innerHTML = '📷 Google Photos'; return; }
+        el.innerHTML = '🔗 ' + new URL(url).hostname;
+    } catch(_) { el.innerHTML = ''; }
+}
+
+async function submitAddItem() {
+    const isGallery = currentDrawerSection === 'gallery';
+    const title  = document.getElementById('aiTitle')?.value.trim() || '';
+    const url    = document.getElementById('aiUrl')?.value.trim()   || '';
+    const desc   = document.getElementById('aiDesc')?.value.trim()  || '';
+    const statusEl = document.getElementById('addItemStatus');
+    const btn    = document.getElementById('addItemBtn');
+
+    if (!title) { showToast('Vui lòng nhập tiêu đề'); document.getElementById('aiTitle')?.focus(); return; }
+    if (!url)   { showToast('Vui lòng nhập đường link'); document.getElementById('aiUrl')?.focus(); return; }
+
+    let item;
+    if (isGallery) {
+        const m = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
+        const type = url.includes('drive.google') ? 'drive'
+                   : (url.includes('youtube') || url.includes('youtu.be')) ? 'youtube'
+                   : url.includes('photos.google') ? 'photo' : 'link';
+        item = { title, desc, url, type, videoId: m ? m[1] : '' };
+    } else {
+        item = {
+            title, desc, url,
+            tag:  document.getElementById('aiTag')?.value.trim()  || '',
+            icon: document.getElementById('aiIcon')?.value.trim() || '📖',
+        };
+    }
+
+    btn.disabled = true; btn.textContent = '⏳ Đang lưu...';
+    statusEl.className = 'status-msg ok'; statusEl.textContent = 'Đang kết nối Google Sheet...';
+    try {
+        const action = isGallery ? 'addGallery' : 'addBook';
+        const res = await gasGet({ action, data: JSON.stringify(item) });
+        if (res.status !== 'ok') throw new Error(res.message || 'Lỗi không xác định');
+        if (isGallery) DATA_GALLERY.push(item);
+        else           DATA_BOOKS.push(item);
+        statusEl.textContent = '✅ Đã lưu thành công lên Google Sheet!';
+        document.getElementById('drawerBody').innerHTML = isGallery ? renderGallery() : renderBooks();
+        showToast('Đã thêm thành công!');
+        setTimeout(closeAddItemModal, 1600);
+    } catch(e) {
+        statusEl.className = 'status-msg err';
+        statusEl.textContent = '❌ Lỗi: ' + e.message;
+        btn.disabled = false; btn.textContent = '💾 Lưu lên Google Sheet';
+    }
+}
+
+// ── LOAD DRAWER DATA FROM GAS ──
+async function loadDrawerData() {
+    if (!GAS_URL || GAS_URL.length < 20) return;
+    try {
+        const [gallRes, bookRes] = await Promise.all([
+            gasGet({ action: 'getGallery' }),
+            gasGet({ action: 'getBooks'   }),
+        ]);
+        if (gallRes.status === 'ok' && Array.isArray(gallRes.data)) DATA_GALLERY = gallRes.data;
+        if (bookRes.status === 'ok' && Array.isArray(bookRes.data)) DATA_BOOKS   = bookRes.data;
+        console.log('[K76] Drawer data:', DATA_GALLERY.length, 'gallery,', DATA_BOOKS.length, 'books');
+    } catch(e) {
+        console.warn('[K76] loadDrawerData failed:', e.message);
+    }
 }
 
 function renderGallery() {
@@ -1661,6 +1814,7 @@ function renderHistory() {
 window.addEventListener('load', () => {
     initMap();
     loadData();
+    loadDrawerData();
 });
 </script>
 </body>
