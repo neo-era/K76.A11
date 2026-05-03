@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn sử dụng - Bản đồ lớp K76.A11</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --navy: #0f172a;
+            --success: #10b981;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+            color: #1e293b;
+            line-height: 1.7;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 3rem;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 1.4rem;
+            color: #64748b;
+        }
+        .section {
+            background: white;
+            margin-bottom: 35px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+        }
+        .section-header {
+            background: linear-gradient(135deg, var(--navy), #1e293b);
+            color: white;
+            padding: 22px 30px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .content {
+            padding: 35px;
+        }
+        .step {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 30px;
+            align-items: flex-start;
+        }
+        .step-number {
+            width: 42px; height: 42px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .highlight {
+            background: #ecfdf5;
+            padding: 25px;
+            border-radius: 16px;
+            border-left: 6px solid var(--success);
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 16px;
+            margin: 15px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+        ul { padding-left: 25px; }
+        li { margin-bottom: 8px; }
+        footer {
+            text-align: center;
+            padding: 50px 20px;
+            color: #64748b;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>🎓 Hướng dẫn sử dụng</h1>
+        <p class="subtitle">Phiên bản: <strong>1.5</strong> — Ngày cập nhật: <strong>03/05/2026</strong></p>
+       
+    </header>
+
+    <div class="section">
+        <div class="section-header">1. Mục đích</div>
+        <div class="content">
+            <p>Website giúp quản lý thông tin học viên lớp K76.A11 trên bản đồ:</p>
+            <ul>
+                <li>✅ Xem vị trí, thông tin cá nhân</li>
+                <li>✅ Chỉnh sửa nhanh thông tin & tọa độ</li>
+                <li>✅ Tìm kiếm, lọc danh sách</li>
+                <li>✅ Xem ảnh kỷ niệm, tài liệu, lịch sử cập nhật</li>
+                <li>✅ Đồng bộ dữ liệu với Google Sheet qua Apps Script</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">2. Giao diện chính</div>
+        <div class="content">
+            <ul>
+                <li><strong>Top Bar</strong>: Tìm kiếm nhanh, logo lớp</li>
+                <li><strong>Left Panel</strong>: Danh sách học viên (có thể ẩn/mở)</li>
+                <li><strong>Bản đồ</strong>: OpenStreetMap (có lớp vệ tinh)</li>
+                <li><strong>Bottom Nav</strong> (mobile): Truy cập nhanh các tính năng</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">3. Các tính năng chính</div>
+        <div class="content">
+
+            <h3>A. Xem & Tìm kiếm học viên</h3>
+            <ul>
+                <li>Nhập tên vào ô tìm kiếm trên cùng → Enter</li>
+                <li>Click vào học viên trong panel bên trái → bản đồ tự zoom đến vị trí</li>
+                <li>Click marker trên bản đồ → xem popup chi tiết</li>
+            </ul>
+
+            <h3>B. Thêm / Chỉnh sửa thông tin</h3>
+            <ol>
+                <li>Nhấn nút <strong>"Thêm marker mới"</strong> (hoặc click trực tiếp lên bản đồ)</li>
+                <li>Điền thông tin (Họ tên là bắt buộc)</li>
+                <li>Nhấn <strong>"Lấy vị trí GPS hiện tại"</strong></li>
+                <li>Chụp/chọn ảnh (nếu có)</li>
+                <li>Chọn:
+                    <ul>
+                        <li><strong>Lưu cục bộ</strong> → chỉ lưu tạm trên trình duyệt</li>
+                        <li><strong>Lưu & Đồng bộ</strong> → gửi lên Google Sheet</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>C. Chỉ đường</h3>
+            <ul>
+                <li>Mở popup của một học viên → nhấn <strong>"Chỉ đường"</strong></li>
+                <li>Chọn xe máy hoặc ô tô → bản đồ sẽ vẽ lộ trình thực tế</li>
+            </ul>
+
+            <h3>D. Menu phụ (Drawer)</h3>
+            <ul>
+                <li>📸 <strong>Kỷ niệm</strong>: Xem ảnh/video lớp</li>
+                <li>📚 <strong>Kiến thức</strong>: Tài liệu học tập</li>
+                <li>🕐 <strong>Lịch sử</strong>: Nhật ký cập nhật</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">4. Hướng dẫn sử dụng trên Mobile</div>
+        <div class="content">
+            <ul>
+                <li>Vuốt từ trái sang phải để mở danh sách học viên</li>
+                <li>Bottom Nav ở dưới màn hình</li>
+                <li>Popup và modal hoạt động tốt trên điện thoại</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">5. Đồng bộ dữ liệu </div>
+        <div class="content">
+            <ol>
+                    <li>Khi lưu thông tin → chọn <strong>"Lưu & Đồng bộ"</strong></li>
+            </ol>
+        </div>
+    </div>
+
+   
+    <div class="section">
+        <div class="section-header">6. Phím tắt</div>
+        <div class="content">
+            <ul>
+                <li><strong>Enter</strong> trong ô tìm kiếm → tìm ngay</li>
+                <li><strong>Click đúp</strong> vào marker → mở chỉnh sửa</li>
+                <li><strong>F5</strong> → tải lại bản đồ + dữ liệu mới nhất</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Hỗ trợ</div>
+        <div class="content">
+            <p><strong>Nếu gặp lỗi</strong> → Alo.</p>
+            <p><strong>Muốn thêm tính năng mới</strong> (thống kê, xuất Excel, dark mode…): --> Alo.</p>
+            <div class="highlight" style="text-align:center; font-size:1.3rem; margin-top:20px;">
+                🎉 <strong>Chúc các bạn K76.A11 vui vẻ & thành công!</strong> 🎓
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Copyright <strong>maivulam2020@gmail.com</strong> — Hỗ trợ lớp K76.A11 ❤️</p>
+    </footer>
+
+</div>
+</body>
+</html>
