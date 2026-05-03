@@ -420,6 +420,97 @@
         #routeBar .rb-close:hover { background: rgba(255,255,255,0.28); }
         @media (min-width: 769px) { #routeBar { bottom: 20px; } }
 
+        /* ── TOPBAR MENU BTNS (desktop) ── */
+        .topbar-menu-btns { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+        .topbar-menu-btns button {
+            width: 36px; height: 36px; border-radius: 8px; border: none;
+            background: rgba(255,255,255,0.09); color: #fff; font-size: 17px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .topbar-menu-btns button:hover { background: rgba(255,255,255,0.2); }
+        @media (max-width: 768px) { .topbar-menu-btns { display: none; } }
+
+        /* ── TRANSPORT PICKER ── */
+        .transport-sheet {
+            width: 100%; max-width: 480px; margin: 0 auto;
+            background: var(--white); border-radius: 20px 20px 0 0;
+            padding: 0 16px 28px;
+        }
+        .t-handle { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 14px auto 16px; }
+        .t-title { font-size: 15px; font-weight: 700; text-align: center; margin-bottom: 16px; color: var(--text); }
+        .t-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .t-opt {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 8px; padding: 20px 12px;
+            border: 2.5px solid var(--border); border-radius: 14px;
+            background: var(--bg); cursor: pointer; font-family: inherit;
+            font-size: 13px; font-weight: 600; color: var(--text);
+            transition: all 0.15s;
+        }
+        .t-opt .t-icon { font-size: 34px; line-height: 1; }
+        .t-opt:hover { border-color: var(--sky); background: #f0f9ff; color: var(--sky-dark); }
+        .t-opt:active { transform: scale(0.96); }
+        .t-cancel {
+            width: 100%; padding: 13px; border-radius: 12px;
+            border: 1.5px solid var(--border); background: var(--bg);
+            cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit;
+            color: var(--text-muted); transition: background 0.15s;
+        }
+        .t-cancel:hover { background: #f1f5f9; }
+
+        /* ── BOTTOM DRAWER ── */
+        #drawerOverlay {
+            position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+            backdrop-filter: blur(2px); z-index: 5500; display: none;
+        }
+        #drawerOverlay.open { display: block; }
+        #drawer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--white); border-radius: 20px 20px 0 0;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+            z-index: 5600; max-height: 82vh;
+            display: flex; flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1);
+        }
+        #drawer.open { transform: translateY(0); }
+        .drawer-grip { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 12px auto 0; flex-shrink: 0; }
+        .drawer-hdr {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        .drawer-hdr-title { font-size: 15px; font-weight: 700; color: var(--text); }
+        .drawer-body { flex: 1; overflow-y: auto; padding: 14px 16px 32px; }
+
+        /* Gallery */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 4px; }
+        .gallery-card { border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; text-decoration: none; color: var(--text); display: block; transition: box-shadow .15s, transform .15s; background: var(--bg); }
+        .gallery-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+        .gallery-thumb { width: 100%; aspect-ratio: 16/9; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 32px; overflow: hidden; }
+        .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .gallery-lbl { padding: 8px 10px; }
+        .gl-title { font-size: 12px; font-weight: 600; line-height: 1.3; }
+        .gl-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Books */
+        .book-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+        .book-card { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; text-decoration: none; color: var(--text); background: var(--bg); transition: box-shadow .15s; }
+        .book-card:hover { box-shadow: var(--shadow); }
+        .bk-icon { font-size: 28px; flex-shrink: 0; }
+        .bk-title { font-size: 13px; font-weight: 700; line-height: 1.3; }
+        .bk-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+        .bk-tag { display: inline-block; margin-top: 6px; font-size: 10px; background: #dbeafe; color: #1d4ed8; border-radius: 999px; padding: 2px 8px; }
+
+        /* History */
+        .hist-list { display: flex; flex-direction: column; margin-top: 4px; }
+        .hist-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .hist-item:last-child { border-bottom: none; }
+        .hist-dot { margin-top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--sky); border: 2px solid #bae6fd; flex-shrink: 0; }
+        .hist-date { font-size: 11px; color: var(--text-muted); }
+        .hist-title { font-size: 13px; font-weight: 600; margin: 1px 0; }
+        .hist-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
         /* ── LEAFLET OVERRIDES ── */
         .leaflet-control-zoom { border-radius: 10px !important; overflow: hidden; box-shadow: var(--shadow) !important; }
 
@@ -460,6 +551,11 @@
             onkeydown="if(event.key==='Enter')searchMarkers()">
         <button onclick="searchMarkers()">🔍</button>
     </div>
+    <div class="topbar-menu-btns">
+        <button onclick="openDrawer('gallery')" title="Hình ảnh kỷ niệm">📸</button>
+        <button onclick="openDrawer('books')" title="Kiến thức">📚</button>
+        <button onclick="openDrawer('history')" title="Lịch sử cập nhật">🕐</button>
+    </div>
 </header>
 
 <!-- Search dropdown -->
@@ -490,6 +586,34 @@
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- Transport mode picker (bottom sheet) -->
+<div id="transportPicker" class="modal-overlay" style="align-items:flex-end;padding:0;z-index:6500">
+    <div class="transport-sheet">
+        <div class="t-handle"></div>
+        <p class="t-title">🗺️ Chọn phương tiện di chuyển</p>
+        <div class="t-opts">
+            <button class="t-opt" onclick="confirmTransport('motorcycle')">
+                <span class="t-icon">🏍️</span><span>Xe máy</span>
+            </button>
+            <button class="t-opt" onclick="confirmTransport('car')">
+                <span class="t-icon">🚗</span><span>Xe ôtô</span>
+            </button>
+        </div>
+        <button class="t-cancel" onclick="closeTransportPicker()">Hủy</button>
+    </div>
+</div>
+
+<!-- Bottom drawer -->
+<div id="drawerOverlay" onclick="closeDrawer()"></div>
+<div id="drawer">
+    <div class="drawer-grip"></div>
+    <div class="drawer-hdr">
+        <span class="drawer-hdr-title" id="drawerTitle"></span>
+        <button class="modal-close" style="background:var(--bg);color:var(--text);border:1px solid var(--border)" onclick="closeDrawer()">✕</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+</div>
+
 <!-- Route info bar -->
 <div id="routeBar">
     <span>🗺️</span>
@@ -504,6 +628,15 @@
     </button>
     <button class="nav-btn" onclick="centerOnUserLocation()">
         <span class="nav-icon">📍</span><span>Vị trí</span>
+    </button>
+    <button class="nav-btn" onclick="openDrawer('gallery')">
+        <span class="nav-icon">📸</span><span>Kỷ niệm</span>
+    </button>
+    <button class="nav-btn" onclick="openDrawer('books')">
+        <span class="nav-icon">📚</span><span>Kiến thức</span>
+    </button>
+    <button class="nav-btn" onclick="openDrawer('history')">
+        <span class="nav-icon">🕐</span><span>Lịch sử</span>
     </button>
 </nav>
 
@@ -635,8 +768,9 @@ let editImagePath = '';
 let uPendingLat = null, uPendingLon = null;
 let panelVisible = true;
 let userDotMarker = null;
-let userLatLon = null;   // [lat, lon] vị trí người dùng đã lấy
+let userLatLon = null;
 let routeLayer = null;
+let pendingRouteDest = null;
 
 // ── TOAST ──
 let toastTimer;
@@ -778,7 +912,7 @@ function buildPopupHTML(row, idx) {
         ? `<button class="popup-action-btn" onclick="openEditModal(${idx})">✏️ Chỉnh sửa</button>`
         : '';
     const routeBtn = (isFinite(p.lat) && isFinite(p.lon))
-        ? `<button class="popup-action-btn primary" onclick="routeToMarker(${p.lat},${p.lon},'${escapedName}')">🗺️ Chỉ đường</button>`
+        ? `<button class="popup-action-btn primary" onclick="openTransportPicker(${p.lat},${p.lon},'${escapedName}')">🗺️ Chỉ đường</button>`
         : '';
     return `<div class="popup-card">
         <div class="popup-header">
@@ -1383,24 +1517,43 @@ function centerOnUserLocation() {
     }, e => showToast('Không lấy được GPS: ' + e.message), { enableHighAccuracy: true, timeout: 15000 });
 }
 
+// ── TRANSPORT PICKER ──
+function openTransportPicker(lat, lon, name) {
+    pendingRouteDest = { lat, lon, name };
+    document.getElementById('transportPicker').classList.add('open');
+}
+function closeTransportPicker() {
+    document.getElementById('transportPicker').classList.remove('open');
+    pendingRouteDest = null;
+}
+function confirmTransport(mode) {
+    const dest = pendingRouteDest;
+    closeTransportPicker();
+    if (!dest) return;
+    routeToMarker(dest.lat, dest.lon, dest.name, mode);
+}
+
 // ── ROUTING ──
-async function routeToMarker(destLat, destLon, destName) {
+async function routeToMarker(destLat, destLon, destName, mode = 'car') {
     map.closePopup();
     if (userLatLon) {
-        await drawRoute(userLatLon[0], userLatLon[1], destLat, destLon, destName);
+        await drawRoute(userLatLon[0], userLatLon[1], destLat, destLon, destName, mode);
     } else {
         if (!navigator.geolocation) { showToast('Trình duyệt không hỗ trợ GPS'); return; }
         showToast('⏳ Đang lấy vị trí GPS...');
         navigator.geolocation.getCurrentPosition(async pos => {
             updateUserDot(pos.coords.latitude, pos.coords.longitude);
-            await drawRoute(userLatLon[0], userLatLon[1], destLat, destLon, destName);
+            await drawRoute(userLatLon[0], userLatLon[1], destLat, destLon, destName, mode);
         }, e => showToast('Không lấy được GPS: ' + e.message), { enableHighAccuracy: true, timeout: 15000 });
     }
 }
 
-async function drawRoute(fromLat, fromLon, toLat, toLon, toName) {
+async function drawRoute(fromLat, fromLon, toLat, toLon, toName, mode = 'car') {
     showToast('⏳ Đang tính lộ trình...');
     clearRoute();
+    const isMoto = mode === 'motorcycle';
+    const color  = isMoto ? '#f97316' : '#0ea5e9';
+    const icon   = isMoto ? '🏍️' : '🚗';
     try {
         const url = `https://router.project-osrm.org/route/v1/driving/${fromLon},${fromLat};${toLon},${toLat}?overview=full&geometries=geojson`;
         const ctrl = new AbortController();
@@ -1410,16 +1563,15 @@ async function drawRoute(fromLat, fromLon, toLat, toLon, toName) {
         const data = await res.json();
         if (data.code !== 'Ok' || !data.routes.length) throw new Error('Không tìm được lộ trình');
         routeLayer = L.geoJSON(data.routes[0].geometry, {
-            style: { color: '#0ea5e9', weight: 5, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }
+            style: { color, weight: 5, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }
         }).addTo(map);
         map.fitBounds(routeLayer.getBounds().pad(0.12));
-        const km = (data.routes[0].distance / 1000).toFixed(1);
+        const km   = (data.routes[0].distance / 1000).toFixed(1);
         const mins = Math.round(data.routes[0].duration / 60);
-        document.getElementById('routeBarText').textContent = `Đến ${toName}: ${km} km · ~${mins} phút`;
+        document.getElementById('routeBarText').textContent = `${icon} Đến ${toName}: ${km} km · ~${mins} phút`;
         document.getElementById('routeBar').classList.add('show');
     } catch(e) {
-        const gmUrl = `https://www.google.com/maps/dir/${fromLat},${fromLon}/${toLat},${toLon}`;
-        window.open(gmUrl, '_blank');
+        window.open(`https://www.google.com/maps/dir/${fromLat},${fromLon}/${toLat},${toLon}`, '_blank');
         showToast('Mở Google Maps để chỉ đường');
     }
 }
@@ -1427,6 +1579,82 @@ async function drawRoute(fromLat, fromLon, toLat, toLon, toName) {
 function clearRoute() {
     if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
     document.getElementById('routeBar').classList.remove('show');
+}
+
+// ── DRAWER DATA ──
+// Thêm link vào 2 mảng bên dưới để cập nhật nội dung
+const DATA_GALLERY = [
+    // { title: 'Tên album', desc: 'Mô tả', url: 'https://...', type: 'drive|youtube|photo', videoId: 'YOUTUBE_ID' }
+];
+
+const DATA_BOOKS = [
+    // { title: 'Tên sách', desc: 'Mô tả', url: 'https://...', tag: 'Chủ đề', icon: '📗' }
+];
+
+const DATA_HISTORY = [
+    { date: '03/05/2026', title: 'Thêm menu Kỷ niệm, Kiến thức, Lịch sử', desc: 'Menu bottom (mobile) và icon top bar (desktop) để truy cập nhanh 3 mục.' },
+    { date: '03/05/2026', title: 'Chỉ đường xe máy / xe ôtô', desc: 'Chọn phương tiện khi nhấn Chỉ đường; vẽ lộ trình thực tế trên bản đồ (OSRM).' },
+    { date: '02/05/2026', title: 'Sửa lỗi ảnh 404 trên GitHub Pages', desc: 'Linux phân biệt hoa/thường — đổi toàn bộ tên ảnh về chữ thường.' },
+    { date: '02/05/2026', title: 'Chỉ đường từ vị trí hiện tại', desc: 'Vẽ lộ trình thực tế qua OSRM, dự phòng mở Google Maps.' },
+    { date: '01/05/2026', title: 'Ra mắt bản đồ K76.A11', desc: 'Hiển thị học viên trên OpenStreetMap, dữ liệu từ Google Sheet.' },
+];
+
+// ── DRAWER ──
+function openDrawer(section) {
+    const cfg = {
+        gallery: { title: '📸 Hình ảnh kỷ niệm', render: renderGallery },
+        books:   { title: '📚 Kiến thức',         render: renderBooks   },
+        history: { title: '🕐 Lịch sử cập nhật',  render: renderHistory },
+    };
+    const c = cfg[section]; if (!c) return;
+    document.getElementById('drawerTitle').textContent = c.title;
+    document.getElementById('drawerBody').innerHTML = c.render();
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+}
+function closeDrawer() {
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+}
+
+function renderGallery() {
+    if (!DATA_GALLERY.length)
+        return '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:24px 0">Chưa có nội dung.<br>Thêm link vào <b>DATA_GALLERY</b> trong mã nguồn.</p>';
+    const cards = DATA_GALLERY.map(item => {
+        const thumb = buildGalleryThumb(item);
+        const sub = item.desc || (item.type === 'youtube' ? 'YouTube' : item.type === 'drive' ? 'Google Drive' : 'Xem');
+        return `<a class="gallery-card" href="${item.url}" target="_blank" rel="noopener">
+            <div class="gallery-thumb">${thumb}</div>
+            <div class="gallery-lbl"><div class="gl-title">${item.title}</div><div class="gl-sub">${sub}</div></div>
+        </a>`;
+    }).join('');
+    return `<div class="gallery-grid">${cards}</div>`;
+}
+function buildGalleryThumb(item) {
+    const url = item.url || '';
+    if (item.videoId) return `<img src="https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg" alt="">`;
+    const m = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
+    if (m) return `<img src="https://img.youtube.com/vi/${m[1]}/mqdefault.jpg" alt="">`;
+    if (url.includes('drive.google.com') || url.includes('photos.google')) return '📂';
+    return item.icon || '🖼️';
+}
+
+function renderBooks() {
+    if (!DATA_BOOKS.length)
+        return '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:24px 0">Chưa có nội dung.<br>Thêm sách vào <b>DATA_BOOKS</b> trong mã nguồn.</p>';
+    return `<div class="book-list">${DATA_BOOKS.map(b => `
+        <a class="book-card" href="${b.url}" target="_blank" rel="noopener">
+            <span class="bk-icon">${b.icon || '📖'}</span>
+            <div><div class="bk-title">${b.title}</div>${b.desc ? `<div class="bk-desc">${b.desc}</div>` : ''}${b.tag ? `<span class="bk-tag">${b.tag}</span>` : ''}</div>
+        </a>`).join('')}</div>`;
+}
+
+function renderHistory() {
+    return `<div class="hist-list">${DATA_HISTORY.map(h => `
+        <div class="hist-item">
+            <div class="hist-dot"></div>
+            <div><div class="hist-date">${h.date}</div><div class="hist-title">${h.title}</div>${h.desc ? `<div class="hist-desc">${h.desc}</div>` : ''}</div>
+        </div>`).join('')}</div>`;
 }
 
 // ── INIT ──
