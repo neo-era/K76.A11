@@ -384,6 +384,42 @@
         .status-msg.ok { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; display: block; }
         .status-msg.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; display: block; }
 
+        /* ── USER LOCATION DOT ── */
+        .user-dot {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #3b82f6; border: 3px solid #fff;
+            box-shadow: 0 0 0 0 rgba(59,130,246,0.5), 0 2px 8px rgba(0,0,0,0.3);
+            animation: pulse-dot 2s ease-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%   { box-shadow: 0 0 0 0   rgba(59,130,246,0.5), 0 2px 8px rgba(0,0,0,0.3); }
+            70%  { box-shadow: 0 0 0 14px rgba(59,130,246,0),  0 2px 8px rgba(0,0,0,0.3); }
+            100% { box-shadow: 0 0 0 0   rgba(59,130,246,0),   0 2px 8px rgba(0,0,0,0.3); }
+        }
+
+        /* ── ROUTE BAR ── */
+        #routeBar {
+            position: fixed;
+            bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + 10px);
+            left: 50%; transform: translateX(-50%);
+            background: rgba(15,23,42,0.94); color: #fff;
+            border-radius: 999px; padding: 10px 16px;
+            font-size: 13px; font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            z-index: 4000; display: none;
+            align-items: center; gap: 10px;
+            white-space: nowrap; max-width: calc(100vw - 32px);
+        }
+        #routeBar.show { display: flex; }
+        #routeBar .rb-close {
+            background: rgba(255,255,255,0.15); border: none; color: #fff;
+            border-radius: 6px; padding: 3px 8px; cursor: pointer;
+            font-size: 12px; font-family: inherit; transition: background 0.15s;
+            flex-shrink: 0;
+        }
+        #routeBar .rb-close:hover { background: rgba(255,255,255,0.28); }
+        @media (min-width: 769px) { #routeBar { bottom: 20px; } }
+
         /* ── LEAFLET OVERRIDES ── */
         .leaflet-control-zoom { border-radius: 10px !important; overflow: hidden; box-shadow: var(--shadow) !important; }
 
@@ -454,6 +490,13 @@
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- Route info bar -->
+<div id="routeBar">
+    <span>🗺️</span>
+    <span id="routeBarText"></span>
+    <button class="rb-close" onclick="clearRoute()">✕ Xóa lộ trình</button>
+</div>
+
 <!-- ── BOTTOM NAV (mobile) ── -->
 <nav id="bottomNav">
     <button class="nav-btn" onclick="openPanelMobile()">
@@ -461,12 +504,6 @@
     </button>
     <button class="nav-btn" onclick="centerOnUserLocation()">
         <span class="nav-icon">📍</span><span>Vị trí</span>
-    </button>
-    <button class="nav-btn" id="addMarkerBtn" onclick="startAddMarker()">
-        <span class="nav-icon" id="addMarkerIcon">➕</span><span id="addMarkerLabel">Thêm</span>
-    </button>
-    <button class="nav-btn" onclick="openUpdateModal()">
-        <span class="nav-icon">📡</span><span>Cập nhật</span>
     </button>
 </nav>
 
@@ -597,6 +634,9 @@ let editImageDataUrl = '';
 let editImagePath = '';
 let uPendingLat = null, uPendingLon = null;
 let panelVisible = true;
+let userDotMarker = null;
+let userLatLon = null;   // [lat, lon] vị trí người dùng đã lấy
+let routeLayer = null;
 
 // ── TOAST ──
 let toastTimer;
@@ -733,8 +773,12 @@ function buildPopupHTML(row, idx) {
         const fbUrl = /^https?:\/\//.test(p.facebook) ? p.facebook : `https://facebook.com/${p.facebook}`;
         rows.push(`<div class="popup-row"><span class="pi">📘</span><span class="pv"><a href="${fbUrl}" target="_blank" rel="noopener">${p.facebook}</a></span></div>`);
     }
+    const escapedName = (p.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const editBtn = Number.isInteger(idx)
         ? `<button class="popup-action-btn" onclick="openEditModal(${idx})">✏️ Chỉnh sửa</button>`
+        : '';
+    const routeBtn = (isFinite(p.lat) && isFinite(p.lon))
+        ? `<button class="popup-action-btn primary" onclick="routeToMarker(${p.lat},${p.lon},'${escapedName}')">🗺️ Chỉ đường</button>`
         : '';
     return `<div class="popup-card">
         <div class="popup-header">
@@ -751,7 +795,7 @@ function buildPopupHTML(row, idx) {
         </div>
         <div class="popup-actions">
             ${editBtn}
-            <button class="popup-action-btn primary" onclick="openUpdateModalForMe('${(p.name||'').replace(/'/g,"\\'")}')">📍 Cập nhật vị trí</button>
+            ${routeBtn}
         </div>
     </div>`;
 }
@@ -1318,12 +1362,71 @@ async function submitLocationUpdate() {
 }
 
 // ── LOCATION ──
+function updateUserDot(lat, lon) {
+    userLatLon = [lat, lon];
+    if (!userDotMarker) {
+        const icon = L.divIcon({ className: '', iconSize: [18, 18], iconAnchor: [9, 9], html: '<div class="user-dot"></div>' });
+        userDotMarker = L.marker([lat, lon], { icon, zIndexOffset: 1000 }).addTo(map);
+        userDotMarker.bindTooltip('Vị trí của bạn', { permanent: false, direction: 'top', offset: [0, -10] });
+    } else {
+        userDotMarker.setLatLng([lat, lon]);
+    }
+}
+
 function centerOnUserLocation() {
     if (!navigator.geolocation) { showToast('Trình duyệt không hỗ trợ GPS'); return; }
-    navigator.geolocation.getCurrentPosition(p => {
-        map.setView([p.coords.latitude, p.coords.longitude], 17);
+    navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        updateUserDot(lat, lon);
+        map.setView([lat, lon], 17);
         showToast('Đã định vị vị trí của bạn');
-    }, e => showToast('Không lấy được GPS: ' + e.message));
+    }, e => showToast('Không lấy được GPS: ' + e.message), { enableHighAccuracy: true, timeout: 15000 });
+}
+
+// ── ROUTING ──
+async function routeToMarker(destLat, destLon, destName) {
+    map.closePopup();
+    if (userLatLon) {
+        await drawRoute(userLatLon[0], userLatLon[1], destLat, destLon, destName);
+    } else {
+        if (!navigator.geolocation) { showToast('Trình duyệt không hỗ trợ GPS'); return; }
+        showToast('⏳ Đang lấy vị trí GPS...');
+        navigator.geolocation.getCurrentPosition(async pos => {
+            updateUserDot(pos.coords.latitude, pos.coords.longitude);
+            await drawRoute(userLatLon[0], userLatLon[1], destLat, destLon, destName);
+        }, e => showToast('Không lấy được GPS: ' + e.message), { enableHighAccuracy: true, timeout: 15000 });
+    }
+}
+
+async function drawRoute(fromLat, fromLon, toLat, toLon, toName) {
+    showToast('⏳ Đang tính lộ trình...');
+    clearRoute();
+    try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${fromLon},${fromLat};${toLon},${toLat}?overview=full&geometries=geojson`;
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 10000);
+        const res = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(timer);
+        const data = await res.json();
+        if (data.code !== 'Ok' || !data.routes.length) throw new Error('Không tìm được lộ trình');
+        routeLayer = L.geoJSON(data.routes[0].geometry, {
+            style: { color: '#0ea5e9', weight: 5, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }
+        }).addTo(map);
+        map.fitBounds(routeLayer.getBounds().pad(0.12));
+        const km = (data.routes[0].distance / 1000).toFixed(1);
+        const mins = Math.round(data.routes[0].duration / 60);
+        document.getElementById('routeBarText').textContent = `Đến ${toName}: ${km} km · ~${mins} phút`;
+        document.getElementById('routeBar').classList.add('show');
+    } catch(e) {
+        const gmUrl = `https://www.google.com/maps/dir/${fromLat},${fromLon}/${toLat},${toLon}`;
+        window.open(gmUrl, '_blank');
+        showToast('Mở Google Maps để chỉ đường');
+    }
+}
+
+function clearRoute() {
+    if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
+    document.getElementById('routeBar').classList.remove('show');
 }
 
 // ── INIT ──
