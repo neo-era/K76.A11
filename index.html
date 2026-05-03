@@ -624,7 +624,7 @@ function resolveImagePath(imgField) {
     const filename = norm.split('/').filter(Boolean).pop() || '';
     if (!filename) return '';
     // Đảm bảo không bị double prefix nếu sheet đã lưu 'images/...'
-    return `images/${filename}`;
+    return `images/${filename.toLowerCase()}`;
 }
 
 // ── CSV PARSER (RFC 4180 compliant) ──
