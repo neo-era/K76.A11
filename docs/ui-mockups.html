@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K76.A11 — 3 phương án UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--pg:#eef0f4;--pgt:#0f172a;--pgm:#64748b}
+:root[data-page="dark"]{--pg:#08090c;--pgt:#f1f5f9;--pgm:#8b95a5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--pg);color:var(--pgt);font-family:Inter,system-ui,sans-serif;padding:24px 16px 64px}
+h1{font-size:22px;margin-bottom:4px}
+.sub{color:var(--pgm);font-size:14px;margin-bottom:20px}
+.ctl{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.ctl button{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid #8884;background:transparent;color:inherit;font:600 14px Inter;cursor:pointer}
+.var{max-width:1180px;margin:0 auto 56px}
+.var h2{font-size:18px;margin-bottom:2px}
+.var p.d{color:var(--pgm);font-size:14px;margin-bottom:14px;max-width:760px}
+.stage{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.desk{flex:1 1 640px;min-width:300px;height:420px}
+.mob{flex:0 0 260px;height:520px}
+.frame{position:relative;overflow:hidden;border-radius:16px;border:1px solid #8883;box-shadow:0 20px 50px -20px #0006}
+.map{position:absolute;inset:0;background:var(--mapbg);
+ background-image:linear-gradient(var(--mapl) 1px,transparent 1px),linear-gradient(90deg,var(--mapl) 1px,transparent 1px),radial-gradient(circle at 70% 40%,var(--mapg),transparent 40%);
+ background-size:36px 36px,36px 36px,100% 100%}
+.road{position:absolute;background:var(--road);height:8px;border-radius:4px;transform-origin:left}
+.pin{position:absolute;width:38px;height:38px;border-radius:50%;border:3px solid var(--pinb);background:var(--av);display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff;box-shadow:0 4px 12px #0005}
+.pin::after{content:attr(data-n);position:absolute;top:100%;margin-top:3px;font-size:10px;font-weight:600;white-space:nowrap;background:var(--chipbg);color:var(--chipt);padding:1px 6px;border-radius:6px}
+.cl{background:var(--acc);color:var(--onacc)}
+.av{width:36px;height:36px;border-radius:50%;background:var(--av);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex:none}
+:root{--av:linear-gradient(135deg,#f59e0b,#ef4444)}
+.pin:nth-of-type(3n){--av:linear-gradient(135deg,#6366f1,#06b6d4)}
+.pin:nth-of-type(3n+1){--av:linear-gradient(135deg,#10b981,#0ea5e9)}
+.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button{font-family:inherit}
+.tg{position:absolute;right:10px;bottom:10px;z-index:9;min-height:44px;min-width:44px;border-radius:999px;border:1px solid var(--bd);background:var(--surf);color:var(--tx);cursor:pointer;display:grid;place-items:center}
+.tg .m{display:none}[data-t=dark] .tg .s{display:none}[data-t=dark] .tg .m{display:block}
+
+/* ================= A — Glass ================= */
+.A{--mapbg:#dbeafe;--mapl:#ffffff66;--mapg:#bae6fd;--road:#fff;--pinb:#fff;--chipbg:#fff;--chipt:#0f172a;
+ --surf:#ffffffcc;--tx:#0f172a;--mu:#64748b;--bd:#ffffffaa;--acc:#0284c7;--onacc:#fff;--soft:#0ea5e91a;font-family:'Be Vietnam Pro',sans-serif;color:var(--tx)}
+.A[data-t=dark]{--mapbg:#0b1220;--mapl:#ffffff0d;--mapg:#0c4a6e55;--road:#1e293b;--pinb:#0b1220;--chipbg:#0f172acc;--chipt:#e2e8f0;
+ --surf:#111b2ecc;--tx:#e8eef7;--mu:#94a3b8;--bd:#ffffff1f;--acc:#38bdf8;--onacc:#06263a;--soft:#38bdf822}
+.A .gl{background:var(--surf);backdrop-filter:blur(16px) saturate(1.4);border:1px solid var(--bd);border-radius:18px;box-shadow:0 10px 30px -10px #0003}
+.A .top{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:10px;align-items:center;z-index:5}
+.A .brand{padding:0 14px;height:44px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.A .brand i{width:26px;height:26px;border-radius:8px;background:var(--acc);display:block}
+.A .search{flex:1;height:44px;display:flex;align-items:center;gap:8px;padding:0 14px;color:var(--mu);font-size:14px;max-width:420px}
+.A .ib{width:44px;height:44px;display:grid;place-items:center;color:var(--tx)}
+.A .list{position:absolute;top:68px;left:12px;bottom:12px;width:268px;padding:12px;z-index:4;overflow:hidden}
+.A .list h3{font-size:13px;font-weight:600;margin:2px 4px 10px;display:flex;justify-content:space-between}
+.A .list h3 b{background:var(--soft);color:var(--acc);padding:1px 9px;border-radius:99px;font-size:12px}
+.row{display:flex;gap:10px;align-items:center;padding:8px;border-radius:12px}
+.row .t{font-size:13px;font-weight:600;line-height:1.25}.row .s{font-size:12px;color:var(--mu)}
+.A .row:first-of-type{background:var(--soft)}
+.A .pop{position:absolute;left:310px;top:150px;width:236px;padding:14px;z-index:6}
+.pop .h{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.pop .t{font-weight:700;font-size:14px}.pop .s{font-size:12px;color:var(--mu)}
+.btns{display:flex;gap:8px}
+.bt{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--bd);background:transparent;color:var(--tx);font:600 13px inherit;display:flex;gap:6px;align-items:center;justify-content:center;cursor:pointer}
+.bt.p{background:var(--acc);color:var(--onacc);border-color:transparent}
+.A .nav{position:absolute;left:10px;right:10px;bottom:10px;display:flex;justify-content:space-around;padding:6px;z-index:6}
+.nb{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;min-width:56px;min-height:44px;justify-content:center;color:var(--mu);border-radius:14px}
+.A .nb.on{color:var(--acc);background:var(--soft)}
+
+/* ================= B — Dark editorial ================= */
+.B{--mapbg:#0a0b0d;--mapl:#ffffff08;--mapg:#10b98122;--road:#1a1d22;--pinb:#0a0b0d;--chipbg:#0a0b0d;--chipt:#d4d7dd;
+ --surf:#101215;--tx:#f3f4f6;--mu:#8b919b;--bd:#232830;--acc:#34d399;--onacc:#04120c;--soft:#34d3991a;font-family:Manrope,sans-serif;color:var(--tx)}
+.B[data-t=light]{--mapbg:#f4f3ef;--mapl:#00000009;--mapg:#10b98122;--road:#e4e2db;--pinb:#fff;--chipbg:#111;--chipt:#fff;
+ --surf:#fbfaf7;--tx:#111418;--mu:#6b7280;--bd:#dedbd2;--acc:#047857;--onacc:#fff;--soft:#04785714}
+.B .rail{position:absolute;left:0;top:0;bottom:0;width:64px;background:var(--surf);border-right:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:6px;z-index:5}
+.B .logo{width:40px;height:40px;border-radius:10px;border:1px solid var(--acc);color:var(--acc);display:grid;place-items:center;font-weight:800;font-size:13px;margin-bottom:10px}
+.B .rb{width:44px;height:44px;display:grid;place-items:center;border-radius:10px;color:var(--mu)}
+.B .rb.on{background:var(--soft);color:var(--acc)}
+.B .list{position:absolute;left:64px;top:0;bottom:0;width:260px;background:var(--surf);border-right:1px solid var(--bd);padding:14px 10px;z-index:4;overflow:hidden}
+.B .list h3{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin:0 6px 10px}
+.B .q{height:44px;border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;gap:8px;padding:0 12px;color:var(--mu);font-size:13px;margin-bottom:10px}
+.B .row{border-radius:10px;border-left:2px solid transparent}
+.B .row:nth-of-type(1){border-left-color:var(--acc);background:var(--soft)}
+.B .av{border-radius:10px}
+.B .pop{position:absolute;left:350px;top:140px;width:244px;padding:16px;z-index:6;background:var(--surf);border:1px solid var(--bd);border-radius:12px;box-shadow:0 24px 50px -16px #000a}
+.B .bt{border-radius:10px;border-color:var(--bd)}
+.B .pin{border-radius:10px}
+.B .top{position:absolute;right:12px;top:12px;display:flex;gap:8px;z-index:5}
+.B .chip{height:44px;padding:0 14px;display:flex;align-items:center;gap:8px;border:1px solid var(--bd);background:var(--surf);border-radius:10px;font-size:13px;font-weight:600}
+.B .nav{position:absolute;left:0;right:0;bottom:0;background:var(--surf);border-top:1px solid var(--bd);display:flex;justify-content:space-around;padding:6px 6px 10px;z-index:6}
+.B .nb.on{color:var(--acc)}
+.B .mtop{position:absolute;top:0;left:0;right:0;padding:10px;background:var(--surf);border-bottom:1px solid var(--bd);z-index:5;display:flex;gap:8px;align-items:center}
+.B .mtop .q{margin:0;flex:1}
+
+/* ================= C — Soft cards ================= */
+.C{--mapbg:#efe9dc;--mapl:#ffffff55;--mapg:#c7d2fe88;--road:#fffdf7;--pinb:#fff;--chipbg:#fff;--chipt:#1f2937;
+ --surf:#ffffff;--tx:#1f2430;--mu:#6b7080;--bd:#ece7dc;--acc:#4f46e5;--onacc:#fff;--soft:#4f46e512;font-family:'Be Vietnam Pro',sans-serif;color:var(--tx)}
+.C[data-t=dark]{--mapbg:#1a1722;--mapl:#ffffff0a;--mapg:#4f46e533;--road:#2a2636;--pinb:#1a1722;--chipbg:#2a2636;--chipt:#ece9f6;
+ --surf:#231f2e;--tx:#f1eefb;--mu:#a29bb8;--bd:#342f44;--acc:#a5b4fc;--onacc:#1e1b4b;--soft:#a5b4fc1c}
+.C .fl{background:var(--surf);border-radius:22px;box-shadow:0 1px 2px #0002,0 12px 32px -12px #0003;border:1px solid var(--bd)}
+.C .pill{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:min(440px,calc(100% - 28px));height:48px;display:flex;align-items:center;gap:10px;padding:0 6px 0 16px;border-radius:999px;z-index:5;color:var(--mu);font-size:14px}
+.C .pill .go{margin-left:auto;width:44px;height:44px;border-radius:50%;background:var(--acc);color:var(--onacc);display:grid;place-items:center}
+.C .side{position:absolute;right:14px;top:76px;width:270px;bottom:14px;padding:14px;z-index:4;overflow:hidden}
+.C .side h3{font-size:15px;font-weight:700;margin:0 4px 2px}.C .side .s0{font-size:12px;color:var(--mu);margin:0 4px 10px}
+.C .row{border-radius:16px}.C .row:first-of-type{background:var(--soft)}
+.C .pop{position:absolute;left:36px;top:130px;width:244px;padding:16px;z-index:6;border-radius:22px}
+.C .bt{border-radius:999px}
+.C .sheet{position:absolute;left:0;right:0;bottom:0;height:226px;padding:8px 14px 0;border-radius:26px 26px 0 0;z-index:6;overflow:hidden}
+.C .grip{width:40px;height:5px;border-radius:9px;background:var(--bd);margin:0 auto 10px}
+.C .sheet .nav{display:flex;justify-content:space-around;position:absolute;left:0;right:0;bottom:0;padding:6px 8px 10px;border-top:1px solid var(--bd);background:var(--surf)}
+.C .nb.on{color:var(--acc)}
+.C .fab{position:absolute;right:14px;bottom:240px;z-index:7;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;color:var(--acc)}
+.C .tg{bottom:auto;top:76px;right:auto;left:14px}
+.C.mob .tg{top:76px}
+.note{font-size:12px;color:var(--pgm);margin-top:8px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+<symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z"/><path d="M20 17v4H6.5"/></symbol>
+<symbol id="i-nav" viewBox="0 0 24 24"><path d="m3 11 19-9-9 19-2-8-8-2Z"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+</defs></svg>
+
+<div style="max-width:1180px;margin:0 auto">
+<h1>K76.A11 Map — 3 phương án giao diện</h1>
+<p class="sub">Mỗi phương án có bản desktop + mobile (360px). Bấm nút bên dưới để đổi dark / light; nút trăng/mặt trời trong khung đổi riêng từng phương án.</p>
+<div class="ctl">
+ <button onclick="setAll('light')">Tất cả: Light</button>
+ <button onclick="setAll('dark')">Tất cả: Dark</button>
+</div>
+</div>
+
+<!-- ============ A ============ -->
+<section class="var">
+<h2>A — “Kính mờ nổi” (Glass)</h2>
+<p class="d">Bản đồ chiếm toàn màn hình, mọi bảng điều khiển là lớp kính mờ nổi lên trên. Hợp nhất với Google/Apple Maps, mới mẻ nhất; đánh đổi: blur tốn GPU trên máy yếu, cần giữ tương phản cẩn thận.</p>
+<div class="stage">
+ <div class="frame desk A" data-t="light">
+  <div class="map" data-map></div>
+  <div class="top">
+   <div class="gl brand"><i></i>K76.A11</div>
+   <div class="gl search"><svg class="ic"><use href="#i-search"/></svg>Tìm tên học viên…</div>
+   <span style="flex:1"></span>
+   <div class="gl"><div class="ib"><svg class="ic"><use href="#i-img"/></svg></div></div>
+   <div class="gl"><div class="ib"><svg class="ic"><use href="#i-book"/></svg></div></div>
+  </div>
+  <div class="gl list"><h3>Danh sách học viên <b>42</b></h3><div data-rows></div></div>
+  <div class="gl pop"><div class="h"><div class="av">NA</div><div><div class="t">Nguyễn Văn An</div><div class="s">Trưởng phòng · Sở Nội vụ</div></div></div>
+   <div class="s" style="font-size:12px;color:var(--mu);margin-bottom:12px">63/23A Liên Khu 16-18, Bình Tân</div>
+   <div class="btns"><button class="bt"><svg class="ic"><use href="#i-edit"/></svg>Sửa</button><button class="bt p"><svg class="ic"><use href="#i-nav"/></svg>Chỉ đường</button></div></div>
+  <div data-pins></div>
+  <button class="tg" onclick="tg(this)"><svg class="ic s"><use href="#i-moon"/></svg><svg class="ic m"><use href="#i-sun"/></svg></button>
+ </div>
+ <div class="frame mob A" data-t="light">
+  <div class="map" data-map></div>
+  <div class="top"><div class="gl search" style="max-width:none"><svg class="ic"><use href="#i-search"/></svg>Tìm tên học viên…</div></div>
+  <div data-pins data-small></div>
+  <div class="gl pop" style="left:12px;right:12px;width:auto;top:auto;bottom:86px"><div class="h" style="margin-bottom:8px"><div class="av">NA</div><div><div class="t">Nguyễn Văn An</div><div class="s">Trưởng phòng · Sở Nội vụ</div></div></div>
+   <div class="btns"><button class="bt"><svg class="ic"><use href="#i-edit"/></svg>Sửa</button><button class="bt p"><svg class="ic"><use href="#i-nav"/></svg>Chỉ đường</button></div></div>
+  <div class="gl nav">
+   <div class="nb on"><svg class="ic"><use href="#i-list"/></svg>Danh sách</div>
+   <div class="nb"><svg class="ic"><use href="#i-pin"/></svg>Vị trí</div>
+   <div class="nb"><svg class="ic"><use href="#i-img"/></svg>Kỷ niệm</div>
+   <div class="nb"><svg class="ic"><use href="#i-book"/></svg>Kiến thức</div>
+  </div>
+  <button class="tg" style="bottom:auto;top:66px" onclick="tg(this)"><svg class="ic s"><use href="#i-moon"/></svg><svg class="ic m"><use href="#i-sun"/></svg></button>
+ </div>
+</div>
+</section>
+
+<!-- ============ B ============ -->
+<section class="var">
+<h2>B — “Biên tập tối” (Dark editorial)</h2>
+<p class="d">Ưu tiên dark, thanh icon hẹp bên trái + danh sách phẳng, viền mảnh, accent xanh ngọc, avatar vuông bo nhẹ. Gọn, chuyên nghiệp, dễ đọc ngoài trời; đánh đổi: ít “mềm” và thân thiện hơn.</p>
+<div class="stage">
+ <div class="frame desk B" data-t="dark">
+  <div class="map" data-map></div>
+  <div class="rail"><div class="logo">K76</div>
+   <div class="rb on"><svg class="ic"><use href="#i-users"/></svg></div>
+   <div class="rb"><svg class="ic"><use href="#i-img"/></svg></div>
+   <div class="rb"><svg class="ic"><use href="#i-book"/></svg></div>
+   <div class="rb"><svg class="ic"><use href="#i-pin"/></svg></div></div>
+  <div class="list"><h3>Học viên · 42</h3><div class="q"><svg class="ic"><use href="#i-search"/></svg>Tìm tên học viên…</div><div data-rows></div></div>
+  <div class="top"><div class="chip"><svg class="ic"><use href="#i-dl"/></svg>Cài ứng dụng</div></div>
+  <div class="pop"><div class="h"><div class="av">NA</div><div><div class="t">Nguyễn Văn An</div><div class="s">Trưởng phòng · Sở Nội vụ</div></div></div>
+   <div style="font-size:12px;color:var(--mu);margin-bottom:12px">63/23A Liên Khu 16-18, Bình Tân</div>
+   <div class="btns"><button class="bt"><svg class="ic"><use href="#i-edit"/></svg>Sửa</button><button class="bt p"><svg class="ic"><use href="#i-nav"/></svg>Chỉ đường</button></div></div>
+  <div data-pins></div>
+  <button class="tg" onclick="tg(this)"><svg class="ic s"><use href="#i-sun"/></svg><svg class="ic m"><use href="#i-moon"/></svg></button>
+ </div>
+ <div class="frame mob B" data-t="dark">
+  <div class="map" data-map></div>
+  <div class="mtop"><div class="logo" style="width:36px;height:36px;margin:0;font-size:11px">K76</div><div class="q"><svg class="ic"><use href="#i-search"/></svg>Tìm tên học viên…</div></div>
+  <div data-pins data-small></div>
+  <div class="pop" style="left:10px;right:10px;width:auto;top:auto;bottom:84px;padding:12px"><div class="h" style="margin-bottom:8px"><div class="av">NA</div><div><div class="t">Nguyễn Văn An</div><div class="s">Trưởng phòng · Sở Nội vụ</div></div></div>
+   <div class="btns"><button class="bt"><svg class="ic"><use href="#i-edit"/></svg>Sửa</button><button class="bt p"><svg class="ic"><use href="#i-nav"/></svg>Chỉ đường</button></div></div>
+  <div class="nav">
+   <div class="nb on"><svg class="ic"><use href="#i-list"/></svg>Danh sách</div>
+   <div class="nb"><svg class="ic"><use href="#i-pin"/></svg>Vị trí</div>
+   <div class="nb"><svg class="ic"><use href="#i-img"/></svg>Kỷ niệm</div>
+   <div class="nb"><svg class="ic"><use href="#i-book"/></svg>Kiến thức</div>
+  </div>
+  <button class="tg" style="bottom:auto;top:66px" onclick="tg(this)"><svg class="ic s"><use href="#i-sun"/></svg><svg class="ic m"><use href="#i-moon"/></svg></button>
+ </div>
+</div>
+</section>
+
+<!-- ============ C ============ -->
+<section class="var">
+<h2>C — “Thẻ mềm ấm” (Soft cards)</h2>
+<p class="d">Thanh tìm kiếm dạng viên thuốc nổi giữa trên, danh sách là thẻ bo lớn bên phải; mobile dùng bottom sheet kéo lên (kiểu app giao hàng). Thân thiện, dễ dùng một tay; đánh đổi: bố cục khác thói quen hiện tại nhiều nhất.</p>
+<div class="stage">
+ <div class="frame desk C" data-t="light">
+  <div class="map" data-map></div>
+  <div class="fl pill"><svg class="ic"><use href="#i-search"/></svg>Tìm tên học viên…<div class="go"><svg class="ic"><use href="#i-search"/></svg></div></div>
+  <div class="fl side"><h3>Học viên lớp</h3><div class="s0">42 người · 3 chưa có tọa độ</div><div data-rows></div></div>
+  <div class="fl pop"><div class="h"><div class="av">NA</div><div><div class="t">Nguyễn Văn An</div><div class="s">Trưởng phòng · Sở Nội vụ</div></div></div>
+   <div style="font-size:12px;color:var(--mu);margin-bottom:12px">63/23A Liên Khu 16-18, Bình Tân</div>
+   <div class="btns"><button class="bt"><svg class="ic"><use href="#i-edit"/></svg>Sửa</button><button class="bt p"><svg class="ic"><use href="#i-nav"/></svg>Chỉ đường</button></div></div>
+  <div data-pins></div>
+  <button class="tg fl" onclick="tg(this)"><svg class="ic s"><use href="#i-moon"/></svg><svg class="ic m"><use href="#i-sun"/></svg></button>
+ </div>
+ <div class="frame mob C" data-t="light">
+  <div class="map" data-map></div>
+  <div class="fl pill"><svg class="ic"><use href="#i-search"/></svg>Tìm tên học viên…<div class="go"><svg class="ic"><use href="#i-search"/></svg></div></div>
+  <div data-pins data-small></div>
+  <div class="fl fab"><svg class="ic"><use href="#i-pin"/></svg></div>
+  <div class="fl sheet"><div class="grip"></div>
+   <div class="row" style="padding:4px 0"><div class="av">NA</div><div><div class="t">Nguyễn Văn An</div><div class="s">Trưởng phòng · Sở Nội vụ</div></div></div>
+   <div class="btns" style="margin-top:8px"><button class="bt"><svg class="ic"><use href="#i-edit"/></svg>Sửa</button><button class="bt p"><svg class="ic"><use href="#i-nav"/></svg>Chỉ đường</button></div>
+   <div class="nav">
+    <div class="nb on"><svg class="ic"><use href="#i-list"/></svg>Danh sách</div>
+    <div class="nb"><svg class="ic"><use href="#i-pin"/></svg>Vị trí</div>
+    <div class="nb"><svg class="ic"><use href="#i-img"/></svg>Kỷ niệm</div>
+    <div class="nb"><svg class="ic"><use href="#i-book"/></svg>Kiến thức</div>
+   </div></div>
+  <button class="tg fl" onclick="tg(this)"><svg class="ic s"><use href="#i-moon"/></svg><svg class="ic m"><use href="#i-sun"/></svg></button>
+ </div>
+</div>
+</section>
+
+<script>
+const names=[["NA","Nguyễn Văn An","Sở Nội vụ"],["TB","Trần Thị Bích Ngọc","UBND Q. Bình Tân"],["LH","Lê Hoàng Phúc","Công an TP.HCM"],["PM","Phạm Minh Tuấn Anh Khoa","Sở Giáo dục & Đào tạo"],["VT","Võ Thanh Tâm","Chưa có tọa độ ⚠"]];
+document.querySelectorAll('[data-rows]').forEach(el=>{
+ el.innerHTML=names.map(n=>`<div class="row"><div class="av">${n[0]}</div><div style="min-width:0"><div class="t">${n[1]}</div><div class="s">${n[2]}</div></div></div>`).join('');
+});
+const pts=[[56,30,"An"],[66,52,"Ngọc"],[74,24,"Phúc"],[84,60,"Khoa"],[48,66,"Tâm"],[92,34,"Hà"]];
+document.querySelectorAll('[data-pins]').forEach(el=>{
+ const small=el.hasAttribute('data-small');
+ const P=small?[[18,30,"An"],[48,22,"Ngọc"],[70,44,"Phúc"],[30,56,"Khoa"],[78,18,"Hà"]]:pts;
+ el.innerHTML=P.map(p=>`<div class="pin" data-n="${p[2]}" style="left:${p[0]}%;top:${p[1]}%">${p[2].slice(0,2).toUpperCase()}</div>`).join('');
+});
+document.querySelectorAll('[data-map]').forEach(el=>{
+ el.innerHTML='<i class="road" style="left:0;top:38%;width:130%;transform:rotate(-6deg)"></i><i class="road" style="left:20%;top:0;width:120%;transform:rotate(58deg)"></i><i class="road" style="left:0;top:78%;width:120%;transform:rotate(8deg)"></i>';
+});
+function tg(b){const f=b.closest('.frame');f.dataset.t=f.dataset.t==='dark'?'light':'dark'}
+function setAll(t){document.querySelectorAll('.frame').forEach(f=>f.dataset.t=t);document.documentElement.dataset.page=t}
+if(matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.dataset.page='dark';
+</script>
+</body>
+</html>

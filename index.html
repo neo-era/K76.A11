@@ -1,806 +1,734 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
     <title>K76.A11 — Bản đồ lớp</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="author" content="Mai Vũ Lâm">
+    <meta name="description" content="Bản đồ học viên lớp K76.A11 — Học viện Chính trị khu vực 2">
+    <meta name="theme-color" content="#0a0b0d">
+    <meta name="color-scheme" content="dark light">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="K76.A11">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+    <script>
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('k76-theme'); } catch (e) {}
+            if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            document.documentElement.dataset.theme = t;
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+    <link rel="stylesheet" href="vendor/markercluster/MarkerCluster.css">
+    <link rel="stylesheet" href="vendor/markercluster/MarkerCluster.Default.css">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+        /* ══ DESIGN TOKENS ══ */
+        :root, :root[data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #0a0b0d;
+            --surface: #101215;
+            --surface-2: #171a1f;
+            --border: #272c34;
+            --text: #f3f4f6;
+            --text-muted: #9aa1ac;
+            --accent: #34d399;
+            --on-accent: #04120c;
+            --accent-soft: rgba(52, 211, 153, 0.13);
+            --danger: #f87171;
+            --danger-soft: rgba(248, 113, 113, 0.14);
+            --info: #7dd3fc;
+            --chip-bg: #0a0b0d;
+            --chip-text: #e5e7eb;
+            --overlay: rgba(0, 0, 0, 0.62);
+            --skeleton-a: #171a1f;
+            --skeleton-b: #20242b;
+        }
+        :root[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f3ef;
+            --surface: #fbfaf7;
+            --surface-2: #efede6;
+            --border: #dcd9cf;
+            --text: #111418;
+            --text-muted: #5b6370;
+            --accent: #047857;
+            --on-accent: #ffffff;
+            --accent-soft: rgba(4, 120, 87, 0.1);
+            --danger: #b91c1c;
+            --danger-soft: rgba(185, 28, 28, 0.09);
+            --info: #0369a1;
+            --chip-bg: #111418;
+            --chip-text: #ffffff;
+            --overlay: rgba(17, 20, 24, 0.45);
+            --skeleton-a: #ebe9e1;
+            --skeleton-b: #f6f5f0;
+        }
         :root {
-            --navy: #0f172a;
-            --navy2: #1e293b;
-            --sky: #0ea5e9;
-            --sky-dark: #0284c7;
-            --green: #10b981;
-            --amber: #f59e0b;
-            --red: #ef4444;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --bg: #f8fafc;
-            --white: #ffffff;
-            --radius: 12px;
-            --shadow: 0 4px 20px rgba(0,0,0,0.12);
-            --shadow-lg: 0 8px 40px rgba(0,0,0,0.18);
+            --font-ui: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px;
+            --radius-sm: 8px; --radius-md: 10px; --radius-lg: 14px; --radius-pill: 999px;
+            --shadow-1: 0 1px 2px rgb(0 0 0 / 0.25);
+            --shadow-2: 0 24px 50px -16px rgb(0 0 0 / 0.55);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --dur-fast: 150ms;
+            --dur: 250ms;
+            --touch: 44px;
+            --rail-w: 64px;
+            --panel-size: 288px;
+            --panel-w: var(--panel-size);
             --topbar-h: 56px;
             --bottomnav-h: 64px;
+            --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --panel-w: 300px;
         }
+        body.panel-collapsed { --panel-w: 0px; }
 
+        /* ══ BASE ══ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
-            height: 100%; width: 100%;
-            font-family: 'Inter', system-ui, sans-serif;
-            overflow: hidden;
-            background: var(--navy);
-            color: var(--text);
+            height: 100%; width: 100%; overflow: hidden;
+            font-family: var(--font-ui); font-size: 16px; line-height: 1.4;
+            background: var(--bg); color: var(--text);
+            -webkit-text-size-adjust: 100%;
         }
+        button { font-family: inherit; color: inherit; }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .ic { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        .icon-btn {
+            width: var(--touch); height: var(--touch); flex: none;
+            display: inline-flex; align-items: center; justify-content: center;
+            border: 1px solid transparent; border-radius: var(--radius-md);
+            background: transparent; color: var(--text-muted); cursor: pointer;
+            transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+        }
+        .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+        .icon-btn:active { transform: scale(0.96); }
+        .icon-btn.on { background: var(--accent-soft); color: var(--accent); }
 
-        /* ── TOP BAR ── */
+        /* ══ RAIL (desktop) ══ */
+        #rail {
+            display: none;
+            position: fixed; top: 0; left: 0; bottom: 0; width: var(--rail-w);
+            background: var(--surface); border-right: 1px solid var(--border);
+            flex-direction: column; align-items: center; gap: var(--space-1);
+            padding: var(--space-3) 0; z-index: 3200;
+        }
+        .rail-logo {
+            width: 40px; height: 40px; border-radius: var(--radius-md);
+            border: 1px solid var(--accent); color: var(--accent);
+            display: grid; place-items: center; font-weight: 800; font-size: 13px;
+            margin-bottom: var(--space-3); letter-spacing: 0.02em;
+        }
+        .rail-spacer { flex: 1; }
+
+        /* ══ TOP BAR ══ */
         #topBar {
             position: fixed; top: 0; left: 0; right: 0;
-            height: var(--topbar-h);
-            background: rgba(15,23,42,0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex; align-items: center; gap: 10px;
-            padding: 0 12px;
+            height: calc(var(--topbar-h) + var(--safe-top)); padding-top: var(--safe-top);
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: var(--space-2);
+            padding-left: var(--space-3); padding-right: var(--space-3);
             z-index: 3000;
         }
-        .topbar-brand {
-            font-size: 15px; font-weight: 700;
-            background: linear-gradient(135deg, var(--sky), #818cf8);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            flex-shrink: 0; white-space: nowrap;
-        }
+        .topbar-brand { display: flex; align-items: center; gap: var(--space-2); font-weight: 800; font-size: 15px; letter-spacing: 0.01em; flex: none; }
+        .brand-mark { width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--accent); color: var(--accent); display: grid; place-items: center; font-size: 11px; font-weight: 800; }
         .topbar-search {
-            flex: 1; display: flex; align-items: center;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 999px; overflow: hidden;
-            max-width: 500px;
+            flex: 1; min-width: 0; max-width: 480px; height: var(--touch);
+            display: flex; align-items: center;
+            box-shadow: inset 0 0 0 1px var(--border); border-radius: var(--radius-md);
+            background: var(--bg); transition: box-shadow var(--dur-fast) var(--ease);
         }
+        .topbar-search:focus-within { box-shadow: inset 0 0 0 1px var(--accent); }
+        .topbar-search .ic { margin-left: var(--space-3); color: var(--text-muted); }
         .topbar-search input {
-            flex: 1; border: none; background: transparent;
-            color: #fff; font-size: 14px; padding: 0 14px;
-            outline: none; height: 36px;
+            flex: 1; min-width: 0; height: 100%; border: none; outline: none; background: transparent;
+            color: var(--text); font: inherit; font-size: 16px; padding: 0 var(--space-3);
         }
-        .topbar-search input::placeholder { color: rgba(255,255,255,0.4); }
-        .topbar-search button {
-            width: 36px; height: 36px; border: none; background: var(--sky);
-            color: #fff; cursor: pointer; font-size: 15px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; border-radius: 0 999px 999px 0;
-            transition: background 0.2s;
+        .topbar-search input::placeholder, .panel-search input::placeholder { color: var(--text-muted); }
+        .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: var(--space-1); flex: none; }
+        .install-btn {
+            height: var(--touch); padding: 0 var(--space-3); display: none; align-items: center; gap: var(--space-2);
+            border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2);
+            color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer;
+            transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
         }
-        .topbar-search button:hover { background: var(--sky-dark); }
+        .install-btn.show { display: inline-flex; }
+        .install-btn:hover { border-color: var(--accent); }
+        .install-btn .lbl { display: none; }
         #searchResultsDropdown {
-            position: fixed; top: var(--topbar-h); left: 12px; right: 12px;
-            max-width: 524px; background: var(--white);
-            border-radius: var(--radius); box-shadow: var(--shadow-lg);
-            max-height: 280px; overflow-y: auto;
-            z-index: 3100; display: none;
+            position: fixed; top: calc(var(--topbar-h) + var(--safe-top) + 4px); left: var(--space-3); right: var(--space-3);
+            max-width: 480px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); box-shadow: var(--shadow-2);
+            max-height: 320px; overflow-y: auto; z-index: 3100; display: none;
         }
-        #searchResultsDropdown ul { list-style: none; padding: 6px 0; }
+        #searchResultsDropdown ul { list-style: none; padding: var(--space-1); }
         #searchResultsDropdown li a {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 16px; color: var(--text); text-decoration: none;
-            font-size: 13px; transition: background 0.15s;
+            display: flex; align-items: center; gap: var(--space-2); min-height: var(--touch);
+            padding: 0 var(--space-3); color: var(--text); text-decoration: none; font-size: 14px;
+            border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease);
         }
-        #searchResultsDropdown li a:hover { background: #f1f5f9; }
+        #searchResultsDropdown li a:hover { background: var(--surface-2); }
 
-        /* ── LEFT PANEL ── */
+        /* ══ LEFT PANEL ══ */
+        #leftPanelOverlay {
+            position: fixed; inset: 0; background: var(--overlay); z-index: 4400;
+            opacity: 0; visibility: hidden; transition: opacity var(--dur) var(--ease), visibility var(--dur);
+        }
+        #leftPanelOverlay.open { opacity: 1; visibility: visible; }
         #leftPanel {
-            position: fixed;
-            top: var(--topbar-h); left: 0; bottom: 0;
-            width: var(--panel-w);
-            background: var(--white);
-            border-right: 1px solid var(--border);
-            display: flex; flex-direction: column;
-            z-index: 2000;
-            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+            position: fixed; top: 0; left: 0; bottom: 0; width: min(320px, 88vw);
+            background: var(--surface); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; z-index: 4500;
+            padding-top: var(--safe-top);
+            transform: translateX(-100%); visibility: hidden;
+            transition: transform var(--dur) var(--ease), visibility var(--dur);
         }
-        #leftPanel.hidden { transform: translateX(-100%); }
-        .panel-header {
-            background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
-            color: #fff; padding: 14px 16px;
-            display: flex; align-items: center; justify-content: space-between;
-            flex-shrink: 0;
-        }
-        .panel-header-title { font-size: 14px; font-weight: 700; }
-        .panel-header-count {
-            background: rgba(14,165,233,0.3); color: #7dd3fc;
-            border-radius: 999px; padding: 2px 8px; font-size: 12px;
-        }
-        .panel-search {
-            padding: 10px 12px; flex-shrink: 0;
-            border-bottom: 1px solid var(--border);
-        }
+        #leftPanel.open { transform: none; visibility: visible; }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-4) var(--space-2); flex: none; }
+        .panel-header-title { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+        .panel-header-count { background: var(--accent-soft); color: var(--accent); border-radius: var(--radius-pill); padding: 2px 10px; font-size: 12px; font-weight: 700; }
+        .panel-search { padding: var(--space-2) var(--space-3) var(--space-3); flex: none; }
         .panel-search input {
-            width: 100%; padding: 8px 12px;
-            border: 1.5px solid var(--border); border-radius: 8px;
-            font-size: 13px; font-family: inherit; outline: none;
-            transition: border-color 0.2s; background: var(--bg);
+            width: 100%; height: var(--touch); padding: 0 var(--space-3);
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            font: inherit; font-size: 16px; color: var(--text); background: var(--bg); outline: none;
+            transition: border-color var(--dur-fast) var(--ease);
         }
-        .panel-search input:focus { border-color: var(--sky); }
-        .panel-list { flex: 1; overflow-y: auto; }
+        .panel-search input:focus { border-color: var(--accent); }
+        .panel-list { flex: 1; overflow-y: auto; padding: 0 var(--space-2) var(--space-2); overscroll-behavior: contain; }
         .panel-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 14px; cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-            transition: background 0.15s;
+            display: flex; align-items: center; gap: var(--space-3); min-height: 56px;
+            padding: var(--space-2) var(--space-3); cursor: pointer;
+            border-radius: var(--radius-md); border-left: 2px solid transparent;
+            transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
         }
-        .panel-item:hover { background: #f0f9ff; }
-        .panel-item.active { background: #e0f2fe; }
-        .panel-avatar {
-            width: 40px; height: 40px; border-radius: 50%;
-            object-fit: cover; flex-shrink: 0;
-            border: 2px solid var(--border);
-            background: #f1f5f9;
+        .panel-item:hover { background: var(--surface-2); }
+        .panel-item.active { background: var(--accent-soft); border-left-color: var(--accent); }
+        .panel-avatar, .panel-avatar-placeholder, .popup-avatar, .popup-avatar-placeholder {
+            width: 40px; height: 40px; border-radius: var(--radius-md); flex: none; object-fit: cover;
+            background: var(--surface-2); border: 1px solid var(--border);
         }
-        .panel-avatar-placeholder {
-            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-        }
+        .panel-avatar-placeholder, .popup-avatar-placeholder { display: grid; place-items: center; color: var(--text-muted); }
+        .popup-avatar, .popup-avatar-placeholder { width: 52px; height: 52px; }
         .panel-item-info { min-width: 0; flex: 1; }
-        .panel-item-name {
-            font-size: 13px; font-weight: 600; color: var(--text);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .panel-item-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .panel-item-sub { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+        .panel-no-coords { color: var(--danger); display: grid; place-items: center; flex: none; }
+        .panel-state { padding: var(--space-5) var(--space-4); text-align: center; color: var(--text-muted); font-size: 14px; }
+        .panel-state strong { display: block; color: var(--text); font-size: 15px; margin-bottom: var(--space-1); }
+        .panel-state .ic { width: 28px; height: 28px; margin-bottom: var(--space-2); }
+        .panel-state button { margin-top: var(--space-3); min-height: var(--touch); padding: 0 var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 14px; cursor: pointer; }
+        #panelError { color: var(--text-muted); }
+        #panelError .ic { color: var(--danger); }
+        .skeleton-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); min-height: 56px; }
+        .skeleton { border-radius: var(--radius-sm); background: linear-gradient(90deg, var(--skeleton-a), var(--skeleton-b), var(--skeleton-a)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+        .skeleton.av { width: 40px; height: 40px; border-radius: var(--radius-md); flex: none; }
+        .skeleton.l1 { height: 12px; width: 70%; } .skeleton.l2 { height: 10px; width: 45%; margin-top: 8px; }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+        .panel-footer { flex: none; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3); padding-bottom: calc(var(--space-3) + var(--safe-bottom)); border-top: 1px solid var(--border); }
+        .panel-footer span { flex: 1; font-size: 12px; color: var(--text-muted); }
+        .social-btn {
+            width: var(--touch); height: var(--touch); border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center; text-decoration: none; color: var(--text);
+            border: 1px solid var(--border); background: var(--surface-2);
+            transition: border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
         }
-        .panel-item-sub {
-            font-size: 11px; color: var(--text-muted);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            margin-top: 2px;
-        }
-        .panel-item-badge {
-            font-size: 10px; padding: 2px 6px; border-radius: 999px;
-            background: #dbeafe; color: #1d4ed8; flex-shrink: 0;
-        }
-        .panel-no-coords { color: #f59e0b; font-size: 14px; flex-shrink: 0; }
-        #panelLoading {
-            padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;
-        }
+        .social-btn:hover { border-color: var(--accent); }
+        .social-btn svg { fill: currentColor; }
 
-        /* Panel toggle button */
-        #panelToggle {
-            position: fixed;
-            top: calc(var(--topbar-h) + 12px);
-            left: calc(var(--panel-w) + 8px);
-            z-index: 2100;
-            background: var(--white); border: 1px solid var(--border);
-            border-radius: 8px; width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 16px;
-            box-shadow: var(--shadow);
-            transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
-        }
-        #panelToggle.panel-hidden { left: 8px; }
-
-        /* ── MAP ── */
+        /* ══ MAP ══ */
         #map {
-            position: fixed;
-            top: var(--topbar-h);
-            left: var(--panel-w);
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-            transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+            position: fixed; top: calc(var(--topbar-h) + var(--safe-top)); left: 0; right: 0;
+            bottom: calc(var(--bottomnav-h) + var(--safe-bottom)); z-index: 1; background: var(--bg);
         }
-        #map.panel-hidden { left: 0; }
+        :root[data-theme="dark"] .tiles-osm { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9); }
+        .leaflet-bar, .leaflet-control-layers { border: 1px solid var(--border) !important; border-radius: var(--radius-md) !important; box-shadow: var(--shadow-1) !important; overflow: hidden; }
+        .leaflet-bar a, .leaflet-bar a:hover { width: var(--touch) !important; height: var(--touch) !important; line-height: var(--touch) !important; background-color: var(--surface); color: var(--text); border-bottom-color: var(--border); }
+        .leaflet-bar a:hover { background-color: var(--surface-2); }
+        .leaflet-control-layers { background: var(--surface); color: var(--text); }
+        .leaflet-control-layers-toggle { width: var(--touch) !important; height: var(--touch) !important; background-color: transparent; }
+        :root[data-theme="dark"] .leaflet-control-layers-toggle { filter: invert(1); }
+        .leaflet-control-layers-expanded { padding: var(--space-2) var(--space-3); font-family: var(--font-ui); }
+        .leaflet-control-layers label { min-height: 32px; display: flex; align-items: center; gap: var(--space-2); font-size: 14px; }
+        .leaflet-control-attribution { background: var(--surface) !important; color: var(--text-muted) !important; opacity: 0.9; }
+        .leaflet-control-attribution a { color: var(--text-muted) !important; }
+        .custom-image-icon { border-radius: var(--radius-md); border: 2px solid var(--surface); box-shadow: 0 4px 12px rgb(0 0 0 / 0.45); object-fit: cover; background: var(--surface-2); }
+        .custom-label { background: none; border: none; box-shadow: none; text-align: center; pointer-events: none; font-family: var(--font-ui); }
+        .custom-label div { display: inline-block; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 1px 6px; border-radius: 6px; background: var(--chip-bg); color: var(--chip-text); font-size: 11px; font-weight: 700; }
+        .user-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--info); border: 3px solid var(--surface); animation: pulse-dot 2s ease-out infinite; }
+        @keyframes pulse-dot {
+            0%   { box-shadow: 0 0 0 0 rgb(56 189 248 / 0.55), 0 2px 8px rgb(0 0 0 / 0.3); }
+            70%  { box-shadow: 0 0 0 14px rgb(56 189 248 / 0), 0 2px 8px rgb(0 0 0 / 0.3); }
+            100% { box-shadow: 0 0 0 0 rgb(56 189 248 / 0), 0 2px 8px rgb(0 0 0 / 0.3); }
+        }
 
-        /* ── BOTTOM NAV (mobile only) ── */
+        /* ══ POPUP ══ */
+        .leaflet-popup-content-wrapper { background: var(--surface); color: var(--text); border-radius: var(--radius-lg) !important; border: 1px solid var(--border); box-shadow: var(--shadow-2) !important; padding: 0 !important; overflow: hidden; }
+        .leaflet-popup-tip { background: var(--surface); border: 1px solid var(--border); }
+        .leaflet-popup-content { margin: 0 !important; width: min(280px, calc(100vw - 64px)) !important; }
+        .leaflet-container a.leaflet-popup-close-button { width: var(--touch); height: var(--touch); padding: 0; display: grid; place-items: center; font-size: 22px; color: var(--text-muted); top: 0; right: 0; }
+        .popup-card { font-family: var(--font-ui); color: var(--text); }
+        .popup-header { padding: var(--space-4); padding-right: 48px; display: flex; gap: var(--space-3); align-items: center; border-bottom: 1px solid var(--border); }
+        .popup-name { font-size: 15px; font-weight: 800; line-height: 1.3; word-break: break-word; }
+        .popup-id { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .popup-title-badge { display: inline-block; background: var(--accent-soft); color: var(--accent); border-radius: var(--radius-pill); padding: 2px 10px; font-size: 12px; font-weight: 700; margin-top: var(--space-1); }
+        .popup-body { padding: var(--space-2) var(--space-4); }
+        .popup-row { display: flex; align-items: center; gap: var(--space-2); padding: 6px 0; font-size: 14px; }
+        .popup-row .pi { color: var(--text-muted); margin-top: 1px; }
+        .popup-row .pi .ic { width: 16px; height: 16px; }
+        .popup-row .pv { line-height: 1.45; word-break: break-word; min-width: 0; }
+        .popup-row .pv a { color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; min-height: var(--touch); }
+        .popup-coords { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px var(--space-3); font-size: 12px; color: var(--text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: var(--space-2) 0; }
+        .popup-actions { display: flex; gap: var(--space-2); padding: var(--space-2) var(--space-4) var(--space-4); }
+        .popup-action-btn {
+            flex: 1; min-height: var(--touch); border-radius: var(--radius-md); border: 1px solid var(--border);
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            font-size: 13px; font-weight: 700; cursor: pointer; background: transparent; color: var(--text);
+            transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+        }
+        .popup-action-btn .ic { width: 16px; height: 16px; }
+        .popup-action-btn:hover { border-color: var(--accent); }
+        .popup-action-btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+        .popup-action-btn.primary:hover { filter: brightness(1.08); }
+
+        /* ══ BOTTOM NAV (mobile) ══ */
         #bottomNav {
-            display: none;
             position: fixed; bottom: 0; left: 0; right: 0;
-            height: calc(var(--bottomnav-h) + var(--safe-bottom));
-            padding-bottom: var(--safe-bottom);
-            background: rgba(15,23,42,0.95);
-            backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255,255,255,0.08);
-            align-items: center; justify-content: space-around;
-            z-index: 3000;
+            height: calc(var(--bottomnav-h) + var(--safe-bottom)); padding-bottom: var(--safe-bottom);
+            background: var(--surface); border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-around; z-index: 3000;
         }
         .nav-btn {
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
-            background: transparent; border: none; cursor: pointer;
-            color: rgba(255,255,255,0.55); font-size: 11px; font-family: inherit;
-            padding: 6px 10px; border-radius: 10px;
-            transition: color 0.2s, background 0.2s; min-width: 52px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+            min-width: 64px; min-height: var(--touch); padding: 4px 8px; border: none; background: transparent;
+            color: var(--text-muted); font-size: 11px; font-weight: 700; cursor: pointer; border-radius: var(--radius-md);
+            transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
         }
-        .nav-btn .nav-icon { font-size: 20px; line-height: 1; }
-        .nav-btn:hover, .nav-btn.active { color: var(--sky); }
-        .nav-btn.active { background: rgba(14,165,233,0.12); }
+        .nav-btn:hover, .nav-btn.active { color: var(--accent); }
+        .nav-btn.active { background: var(--accent-soft); }
 
-        /* ── TOAST ── */
+        /* ══ TOAST / ROUTE BAR / iOS HINT ══ */
         #toast {
-            position: fixed; bottom: 20px;
-            left: 50%; transform: translateX(-50%) translateY(8px);
-            background: rgba(15,23,42,0.92); color: #fff;
-            padding: 10px 18px; border-radius: 999px;
-            font-size: 13px; font-weight: 500; box-shadow: var(--shadow);
-            z-index: 9000; opacity: 0; transition: opacity 0.25s, transform 0.25s;
-            pointer-events: none; white-space: nowrap; max-width: calc(100vw - 32px);
-            text-align: center;
+            position: fixed; bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + var(--space-3)); left: 50%;
+            transform: translate(-50%, 8px); background: var(--chip-bg); color: var(--chip-text);
+            border: 1px solid var(--border); padding: 10px var(--space-4); border-radius: var(--radius-md);
+            font-size: 14px; font-weight: 600; box-shadow: var(--shadow-2); z-index: 9000; opacity: 0;
+            transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+            pointer-events: none; max-width: calc(100vw - 32px); text-align: center;
         }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #toast.show { opacity: 1; transform: translate(-50%, 0); }
+        #routeBar {
+            position: fixed; bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + var(--space-3)); left: 50%; transform: translateX(-50%);
+            background: var(--surface); color: var(--text); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+            font-size: 14px; font-weight: 600; box-shadow: var(--shadow-2); z-index: 4000; display: none;
+            align-items: center; gap: var(--space-3); max-width: calc(100vw - 32px);
+        }
+        #routeBar.show { display: flex; }
+        #routeBar .ic { color: var(--accent); }
+        #routeBar .rb-close { min-height: var(--touch); padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface-2); font-size: 13px; font-weight: 700; cursor: pointer; flex: none; }
+        #routeBar .rb-close:hover { border-color: var(--danger); color: var(--danger); }
+        #iosInstallHint {
+            position: fixed; left: var(--space-3); right: var(--space-3); z-index: 3500;
+            bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + var(--space-3));
+            display: none; align-items: center; gap: var(--space-3);
+            background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius-lg);
+            padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); font-size: 13px; box-shadow: var(--shadow-2);
+        }
+        #iosInstallHint.show { display: flex; }
+        #iosInstallHint p { flex: 1; line-height: 1.45; }
 
-        /* ── LEAFLET POPUP ── */
-        .leaflet-popup-content-wrapper {
-            border-radius: 14px !important; box-shadow: var(--shadow-lg) !important;
-            padding: 0 !important; overflow: hidden;
-            border: 1px solid var(--border); min-width: 240px;
-        }
-        .leaflet-popup-content { margin: 0 !important; }
-        .leaflet-popup-tip-container { margin-top: -1px; }
-        .popup-card { font-family: 'Inter', sans-serif; color: var(--text); }
-        .popup-header {
-            background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
-            padding: 14px 14px 12px; display: flex; gap: 12px; align-items: center;
-        }
-        .popup-avatar {
-            width: 52px; height: 52px; border-radius: 10px;
-            object-fit: cover; border: 2px solid rgba(255,255,255,0.3);
-            flex-shrink: 0; background: rgba(255,255,255,0.1);
-        }
-        .popup-avatar-placeholder {
-            width: 52px; height: 52px; border-radius: 10px;
-            background: rgba(255,255,255,0.15);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px; flex-shrink: 0;
-        }
-        .popup-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; }
-        .popup-id { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
-        .popup-title-badge {
-            display: inline-block; background: rgba(14,165,233,0.25);
-            color: #7dd3fc; border-radius: 999px; padding: 2px 8px;
-            font-size: 11px; margin-top: 4px;
-        }
-        .popup-body { padding: 10px 14px; }
-        .popup-row {
-            display: flex; align-items: flex-start; gap: 8px;
-            padding: 5px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px;
-        }
-        .popup-row:last-child { border-bottom: none; }
-        .popup-row .pi { font-size: 14px; flex-shrink: 0; margin-top: 1px; color: var(--text-muted); }
-        .popup-row .pv { color: var(--text); line-height: 1.4; word-break: break-word; }
-        .popup-row .pv a { color: var(--sky); text-decoration: none; }
-        .popup-coords {
-            background: #f8fafc; border: 1px solid var(--border);
-            border-radius: 8px; padding: 6px 10px;
-            font-size: 11px; color: var(--text-muted); font-family: monospace;
-            margin-top: 8px;
-        }
-        .popup-actions {
-            display: flex; gap: 6px; padding: 10px 14px 14px; flex-wrap: wrap;
-        }
-        .popup-action-btn {
-            flex: 1; padding: 8px 4px; border-radius: 8px; border: 1.5px solid var(--border);
-            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
-            background: var(--bg); color: var(--text); text-align: center;
-            transition: all 0.15s; min-width: 60px;
-        }
-        .popup-action-btn:hover { background: #e0f2fe; border-color: var(--sky); color: var(--sky-dark); }
-        .popup-action-btn.primary { background: var(--sky); color: #fff; border-color: var(--sky); }
-        .popup-action-btn.primary:hover { background: var(--sky-dark); }
-
-        /* ── CUSTOM MAP LABEL ── */
-        .custom-label {
-            background: none; border: none; box-shadow: none;
-            font-weight: 700; font-size: 11px; color: var(--navy);
-            text-shadow: 0 0 3px #fff, 0 0 6px #fff;
-            font-family: 'Inter', sans-serif; pointer-events: none;
-        }
-
-        /* ── MODAL BASE ── */
+        /* ══ MODAL / FORM ══ */
         .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(15,23,42,0.55);
-            backdrop-filter: blur(4px);
-            z-index: 6000; display: none;
-            align-items: center; justify-content: center; padding: 16px;
+            position: fixed; inset: 0; background: var(--overlay); z-index: 6000;
+            display: none; align-items: center; justify-content: center; padding: var(--space-4);
         }
         .modal-overlay.open { display: flex; }
         .modal-card {
-            width: min(420px, calc(100vw - 24px));
-            max-height: calc(100vh - 32px);
-            background: var(--white); border-radius: 18px;
-            box-shadow: var(--shadow-lg); overflow: hidden;
-            display: flex; flex-direction: column;
+            width: min(440px, calc(100vw - 24px)); max-height: calc(100dvh - 32px);
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-2); overflow: hidden; display: flex; flex-direction: column;
         }
-        .modal-header {
-            padding: 14px 16px 12px;
-            background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
-            color: #fff; font-size: 15px; font-weight: 700;
-            display: flex; align-items: center; justify-content: space-between;
-            flex-shrink: 0;
-        }
-        .modal-close {
-            background: rgba(255,255,255,0.15); border: none; color: #fff;
-            width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
-            font-size: 16px; display: flex; align-items: center; justify-content: center;
-        }
-        .modal-close:hover { background: rgba(255,255,255,0.25); }
-        .modal-body { flex: 1; overflow-y: auto; padding: 16px; }
-        .modal-footer {
-            padding: 12px 16px 14px; border-top: 1px solid var(--border);
-            display: flex; gap: 8px; flex-shrink: 0;
-        }
-        .fg { margin-bottom: 12px; }
-        .fg label {
-            display: block; font-size: 11px; font-weight: 600;
-            color: var(--text-muted); margin-bottom: 4px;
-            text-transform: uppercase; letter-spacing: 0.04em;
-        }
+        .modal-header { padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; flex: none; }
+        .modal-close { width: var(--touch); height: var(--touch); border: none; background: transparent; color: var(--text-muted); border-radius: var(--radius-md); cursor: pointer; display: grid; place-items: center; transition: background var(--dur-fast) var(--ease); }
+        .modal-close:hover { background: var(--surface-2); color: var(--text); }
+        .modal-body { flex: 1; overflow-y: auto; padding: var(--space-4); }
+        .modal-footer { padding: var(--space-3) var(--space-4); padding-bottom: calc(var(--space-3) + var(--safe-bottom)); border-top: 1px solid var(--border); display: flex; gap: var(--space-2); flex-wrap: wrap; flex: none; }
+        .fg { margin-bottom: var(--space-3); }
+        .fg label { display: block; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
         .fg input, .fg textarea, .fg select {
-            width: 100%; padding: 9px 12px;
-            border: 1.5px solid var(--border); border-radius: 8px;
-            font-size: 14px; font-family: inherit; color: var(--text);
-            outline: none; transition: border-color 0.2s; background: var(--bg);
+            width: 100%; min-height: var(--touch); padding: 0 var(--space-3);
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            font: inherit; font-size: 16px; color: var(--text); background: var(--bg); outline: none;
+            transition: border-color var(--dur-fast) var(--ease);
         }
-        .fg input:focus, .fg textarea:focus { border-color: var(--sky); background: #fff; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .fg input:focus, .fg textarea:focus { border-color: var(--accent); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+        .req { color: var(--danger); }
         .btn {
-            flex: 1; padding: 11px; border-radius: 10px; border: none;
-            font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
-            transition: background 0.2s, transform 0.1s;
+            flex: 1; min-height: var(--touch); padding: 0 var(--space-4); border-radius: var(--radius-md); border: 1px solid transparent;
+            font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap;
+            transition: filter var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
         }
-        .btn:active { transform: scale(0.97); }
-        .btn-secondary { background: var(--bg); color: var(--text); border: 1.5px solid var(--border) !important; }
-        .btn-primary { background: var(--sky); color: #fff; }
-        .btn-primary:hover { background: var(--sky-dark); }
-        .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
-        .btn-green { background: var(--green); color: #fff; }
-        .btn-green:hover { background: #059669; }
+        .btn:active { transform: scale(0.98); }
+        .btn-secondary { background: transparent; color: var(--text); border-color: var(--border); }
+        .btn-secondary:hover { background: var(--surface-2); }
+        .btn-primary { background: var(--accent); color: var(--on-accent); }
+        .btn-primary:hover { filter: brightness(1.08); }
+        .btn-green { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+        .btn-green:hover { filter: brightness(1.15); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
         .coords-info { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-        .img-preview { margin-top: 10px; display: flex; justify-content: center; }
-        .img-preview img { max-width: 100%; max-height: 120px; border-radius: 10px; object-fit: cover; }
-        .loc-btn {
-            width: 100%; padding: 10px; border-radius: 10px; border: 1.5px dashed var(--sky);
-            background: #f0f9ff; color: var(--sky-dark); font-weight: 600; font-size: 13px;
-            cursor: pointer; font-family: inherit; transition: background 0.2s;
-        }
-        .loc-btn:hover { background: #e0f2fe; }
-        .cam-btn {
-            width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid var(--border);
-            background: var(--bg); color: var(--text); font-size: 13px; font-weight: 600;
-            cursor: pointer; font-family: inherit; transition: background 0.2s;
-        }
-        .status-msg {
-            font-size: 13px; padding: 10px 12px; border-radius: 10px;
-            margin-top: 10px; display: none;
-        }
-        .status-msg.ok { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; display: block; }
-        .status-msg.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; display: block; }
+        .img-preview { margin-top: var(--space-3); display: flex; justify-content: center; }
+        .img-preview img { max-width: 100%; max-height: 120px; border-radius: var(--radius-md); object-fit: cover; }
+        .loc-btn, .cam-btn { width: 100%; min-height: var(--touch); border-radius: var(--radius-md); font-weight: 700; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); transition: background var(--dur-fast) var(--ease); }
+        .loc-btn { border: 1px dashed var(--accent); background: var(--accent-soft); color: var(--accent); }
+        .cam-btn { border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
+        .cam-btn:hover { background: var(--border); }
+        .status-msg { font-size: 14px; padding: var(--space-3); border-radius: var(--radius-md); margin-top: var(--space-3); display: none; }
+        .status-msg.ok { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); display: block; }
+        .status-msg.err { background: var(--danger-soft); color: var(--danger); border: 1px solid var(--danger); display: block; }
+        .mono-box { padding: var(--space-3); background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius-md); font-size: 13px; color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+        .muted-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: var(--space-3); }
 
-        /* ── USER LOCATION DOT ── */
-        .user-dot {
-            width: 18px; height: 18px; border-radius: 50%;
-            background: #3b82f6; border: 3px solid #fff;
-            box-shadow: 0 0 0 0 rgba(59,130,246,0.5), 0 2px 8px rgba(0,0,0,0.3);
-            animation: pulse-dot 2s ease-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%   { box-shadow: 0 0 0 0   rgba(59,130,246,0.5), 0 2px 8px rgba(0,0,0,0.3); }
-            70%  { box-shadow: 0 0 0 14px rgba(59,130,246,0),  0 2px 8px rgba(0,0,0,0.3); }
-            100% { box-shadow: 0 0 0 0   rgba(59,130,246,0),   0 2px 8px rgba(0,0,0,0.3); }
-        }
+        /* ══ TRANSPORT PICKER ══ */
+        #transportPicker { align-items: flex-end; padding: 0; z-index: 6500; }
+        .transport-sheet { width: 100%; max-width: 480px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-bottom: none; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 0 var(--space-4) calc(var(--space-5) + var(--safe-bottom)); }
+        .t-handle, .drawer-grip { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto var(--space-4); }
+        .t-title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: var(--space-4); }
+        .t-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-3); }
+        .t-opt { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); min-height: 96px; justify-content: center; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); cursor: pointer; font-size: 14px; font-weight: 700; transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+        .t-opt .t-icon { font-size: 30px; line-height: 1; }
+        .t-opt:hover { border-color: var(--accent); background: var(--accent-soft); }
+        .t-opt:active { transform: scale(0.98); }
+        .t-cancel { width: 100%; min-height: var(--touch); border-radius: var(--radius-md); border: 1px solid var(--border); background: transparent; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-muted); }
+        .t-cancel:hover { background: var(--surface-2); }
 
-        /* ── ROUTE BAR ── */
-        #routeBar {
-            position: fixed;
-            bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + 10px);
-            left: 50%; transform: translateX(-50%);
-            background: rgba(15,23,42,0.94); color: #fff;
-            border-radius: 999px; padding: 10px 16px;
-            font-size: 13px; font-weight: 500;
-            box-shadow: var(--shadow-lg);
-            z-index: 4000; display: none;
-            align-items: center; gap: 10px;
-            white-space: nowrap; max-width: calc(100vw - 32px);
-        }
-        #routeBar.show { display: flex; }
-        #routeBar .rb-close {
-            background: rgba(255,255,255,0.15); border: none; color: #fff;
-            border-radius: 6px; padding: 3px 8px; cursor: pointer;
-            font-size: 12px; font-family: inherit; transition: background 0.15s;
-            flex-shrink: 0;
-        }
-        #routeBar .rb-close:hover { background: rgba(255,255,255,0.28); }
-        @media (min-width: 769px) { #routeBar { bottom: 20px; } }
-
-        /* ── TOPBAR MENU BTNS (desktop) ── */
-        .topbar-menu-btns { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-        .topbar-menu-btns button {
-            width: 36px; height: 36px; border-radius: 8px; border: none;
-            background: rgba(255,255,255,0.09); color: #fff; font-size: 17px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
-        }
-        .topbar-menu-btns button:hover { background: rgba(255,255,255,0.2); }
-        @media (max-width: 768px) { .topbar-menu-btns { display: none; } }
-
-        /* ── TOPBAR SOCIAL LINKS ── */
-        .topbar-socials { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
-        .social-btn {
-            width: 32px; height: 32px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            text-decoration: none; color: #fff; font-weight: 800;
-            font-size: 13px; flex-shrink: 0;
-            transition: opacity 0.2s, transform 0.15s;
-        }
-        .social-btn:hover { opacity: 0.85; transform: scale(1.08); }
-        .social-btn.fb   { background: #1877f2; }
-        .social-btn.zalo { background: #0068ff; letter-spacing: -0.5px; }
-
-        /* ── TRANSPORT PICKER ── */
-        .transport-sheet {
-            width: 100%; max-width: 480px; margin: 0 auto;
-            background: var(--white); border-radius: 20px 20px 0 0;
-            padding: 0 16px 28px;
-        }
-        .t-handle { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 14px auto 16px; }
-        .t-title { font-size: 15px; font-weight: 700; text-align: center; margin-bottom: 16px; color: var(--text); }
-        .t-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        .t-opt {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 8px; padding: 20px 12px;
-            border: 2.5px solid var(--border); border-radius: 14px;
-            background: var(--bg); cursor: pointer; font-family: inherit;
-            font-size: 13px; font-weight: 600; color: var(--text);
-            transition: all 0.15s;
-        }
-        .t-opt .t-icon { font-size: 34px; line-height: 1; }
-        .t-opt:hover { border-color: var(--sky); background: #f0f9ff; color: var(--sky-dark); }
-        .t-opt:active { transform: scale(0.96); }
-        .t-cancel {
-            width: 100%; padding: 13px; border-radius: 12px;
-            border: 1.5px solid var(--border); background: var(--bg);
-            cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit;
-            color: var(--text-muted); transition: background 0.15s;
-        }
-        .t-cancel:hover { background: #f1f5f9; }
-
-        /* ── BOTTOM DRAWER ── */
-        #drawerOverlay {
-            position: fixed; inset: 0; background: rgba(15,23,42,0.45);
-            backdrop-filter: blur(2px); z-index: 5500; display: none;
-        }
-        #drawerOverlay.open { display: block; }
+        /* ══ DRAWER ══ */
+        #drawerOverlay { position: fixed; inset: 0; background: var(--overlay); z-index: 5500; opacity: 0; visibility: hidden; transition: opacity var(--dur) var(--ease), visibility var(--dur); }
+        #drawerOverlay.open { opacity: 1; visibility: visible; }
         #drawer {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--white); border-radius: 20px 20px 0 0;
-            box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
-            z-index: 5600; max-height: 82vh;
-            display: flex; flex-direction: column;
-            transform: translateY(100%);
-            transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1);
+            position: fixed; bottom: 0; left: 0; right: 0; max-height: 82dvh;
+            background: var(--surface); border: 1px solid var(--border); border-bottom: none;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0; box-shadow: var(--shadow-2);
+            z-index: 5600; display: flex; flex-direction: column;
+            transform: translateY(100%); visibility: hidden;
+            transition: transform var(--dur) var(--ease), visibility var(--dur);
         }
-        #drawer.open { transform: translateY(0); }
-        .drawer-grip { width: 36px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 12px auto 0; flex-shrink: 0; }
-        .drawer-hdr {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 16px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0;
-        }
-        .drawer-hdr-title { font-size: 15px; font-weight: 700; color: var(--text); }
-        .drawer-body { flex: 1; overflow-y: auto; padding: 14px 16px 32px; }
-        .drawer-add-btn {
-            width: 30px; height: 30px; border-radius: 8px;
-            background: var(--sky); border: none; color: #fff;
-            font-size: 20px; line-height: 1; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.15s; flex-shrink: 0;
-        }
-        .drawer-add-btn:hover { background: var(--sky-dark); }
-        /* Add item form preview */
-        .url-preview { margin-top: 6px; font-size: 12px; color: var(--sky-dark); min-height: 18px; display: flex; align-items: center; gap: 6px; }
-        .url-preview img { height: 22px; border-radius: 3px; vertical-align: middle; }
-
-        /* Gallery */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 4px; }
-        .gallery-card { border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; text-decoration: none; color: var(--text); display: block; transition: box-shadow .15s, transform .15s; background: var(--bg); }
-        .gallery-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
-        .gallery-thumb { width: 100%; aspect-ratio: 16/9; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 32px; overflow: hidden; }
+        #drawer.open { transform: none; visibility: visible; }
+        .drawer-grip { margin-bottom: 0; flex: none; }
+        .drawer-hdr { display: flex; align-items: center; justify-content: space-between; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border-bottom: 1px solid var(--border); flex: none; }
+        .drawer-hdr-title { font-size: 16px; font-weight: 800; }
+        .drawer-hdr-actions { display: flex; align-items: center; gap: var(--space-1); }
+        .drawer-body { flex: 1; overflow-y: auto; padding: var(--space-4); padding-bottom: calc(var(--space-5) + var(--safe-bottom)); }
+        .drawer-add-btn { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+        .drawer-add-btn:hover { background: var(--accent); color: var(--on-accent); filter: brightness(1.08); }
+        .url-preview { margin-top: 6px; font-size: 13px; color: var(--accent); min-height: 18px; display: flex; align-items: center; gap: 6px; }
+        .url-preview img { height: 22px; border-radius: 3px; }
+        .empty-note { color: var(--text-muted); font-size: 14px; text-align: center; padding: var(--space-5) 0; line-height: 1.6; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
+        .gallery-card { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; text-decoration: none; color: var(--text); display: block; background: var(--bg); transition: border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
+        .gallery-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .gallery-thumb { width: 100%; aspect-ratio: 16/9; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 30px; overflow: hidden; }
         .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .gallery-lbl { padding: 8px 10px; }
-        .gl-title { font-size: 12px; font-weight: 600; line-height: 1.3; }
-        .gl-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-        /* Books */
-        .book-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
-        .book-card { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; text-decoration: none; color: var(--text); background: var(--bg); transition: box-shadow .15s; }
-        .book-card:hover { box-shadow: var(--shadow); }
-        .bk-icon { font-size: 28px; flex-shrink: 0; }
-        .bk-title { font-size: 13px; font-weight: 700; line-height: 1.3; }
-        .bk-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
-        .bk-tag { display: inline-block; margin-top: 6px; font-size: 10px; background: #dbeafe; color: #1d4ed8; border-radius: 999px; padding: 2px 8px; }
-
-        /* History */
-        .hist-list { display: flex; flex-direction: column; margin-top: 4px; }
-        .hist-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .gallery-lbl { padding: var(--space-2) var(--space-3); }
+        .gl-title { font-size: 13px; font-weight: 700; line-height: 1.3; }
+        .gl-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .book-list { display: flex; flex-direction: column; gap: var(--space-3); }
+        .book-card { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-lg); text-decoration: none; color: var(--text); background: var(--bg); transition: border-color var(--dur-fast) var(--ease); }
+        .book-card:hover { border-color: var(--accent); }
+        .bk-icon { font-size: 26px; flex: none; }
+        .bk-title { font-size: 14px; font-weight: 700; line-height: 1.3; }
+        .bk-desc { font-size: 13px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+        .bk-tag { display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 700; background: var(--accent-soft); color: var(--accent); border-radius: var(--radius-pill); padding: 2px 10px; }
+        .hist-list { display: flex; flex-direction: column; }
+        .hist-item { display: flex; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
         .hist-item:last-child { border-bottom: none; }
-        .hist-dot { margin-top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--sky); border: 2px solid #bae6fd; flex-shrink: 0; }
-        .hist-date { font-size: 11px; color: var(--text-muted); }
-        .hist-title { font-size: 13px; font-weight: 600; margin: 1px 0; }
-        .hist-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+        .hist-dot { margin-top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: none; }
+        .hist-date { font-size: 12px; color: var(--text-muted); }
+        .hist-title { font-size: 14px; font-weight: 700; margin: 1px 0; }
+        .hist-desc { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
 
-        /* ── LEAFLET OVERRIDES ── */
-        .leaflet-control-zoom { border-radius: 10px !important; overflow: hidden; box-shadow: var(--shadow) !important; }
-
-        /* ── MOBILE ── */
-        @media (max-width: 768px) {
-            :root { --panel-w: 0px; }
-            #leftPanel {
-                width: 300px;
-                transform: translateX(-100%);
-                z-index: 4500;
-            }
-            #leftPanel.open {
-                transform: translateX(0);
-            }
-            #panelToggle { display: none; }
-            #map { left: 0 !important; bottom: calc(var(--bottomnav-h) + var(--safe-bottom)); }
-            #bottomNav { display: flex; }
-            .topbar-brand { display: none; }
-            #toast { bottom: calc(var(--bottomnav-h) + var(--safe-bottom) + 12px); }
-            #leftPanelOverlay {
-                position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-                z-index: 4400; display: none; backdrop-filter: blur(2px);
-            }
-            #leftPanelOverlay.open { display: block; }
-        }
+        /* ══ DESKTOP ══ */
         @media (min-width: 769px) {
-            #leftPanelOverlay { display: none !important; }
+            #rail { display: flex; }
+            #bottomNav, #leftPanelOverlay, .panel-close { display: none !important; }
+            #leftPanel {
+                left: var(--rail-w); width: var(--panel-size); padding-top: 0; z-index: 2000;
+                transform: none; visibility: visible;
+            }
+            body.panel-collapsed #leftPanel { transform: translateX(-100%); visibility: hidden; }
+            #topBar { left: calc(var(--rail-w) + var(--panel-w)); height: var(--topbar-h); padding-top: 0; transition: left var(--dur) var(--ease); }
+            #map { left: calc(var(--rail-w) + var(--panel-w)); top: var(--topbar-h); bottom: 0; transition: left var(--dur) var(--ease); }
+            .topbar-brand { display: none; }
+            .install-btn .lbl { display: inline; }
+            #searchResultsDropdown { left: calc(var(--rail-w) + var(--panel-w) + var(--space-3)); right: auto; width: 480px; top: calc(var(--topbar-h) + 4px); }
+            #toast, #routeBar { bottom: var(--space-5); }
+            #iosInstallHint { display: none !important; }
+            #drawer { top: 0; left: auto; right: 0; bottom: 0; width: 420px; max-height: none; border: none; border-left: 1px solid var(--border); border-radius: 0; transform: translateX(100%); }
+            #drawer.open { transform: none; }
+            .drawer-grip { display: none; }
+        }
+        @media (max-width: 768px) { .panel-footer { display: flex; } }
+        @media (min-width: 481px) { .install-btn .lbl { display: inline; } }
+        @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
         }
     </style>
 </head>
+
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z"/><path d="M20 17v4H6.5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+    <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><path d="m3 11 19-9-9 19-2-8-8-2Z"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m10.3 3.9-8.4 14.5A2 2 0 0 0 3.6 21.4h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
+    <symbol id="i-search-x" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M8.5 8.5l5 5M13.5 8.5l-5 5"/></symbol>
+</defs></svg>
+
+<!-- ── RAIL (desktop) ── -->
+<nav id="rail" aria-label="Điều hướng chính">
+    <div class="rail-logo" aria-hidden="true">K76</div>
+    <button class="icon-btn on" id="railPanelBtn" onclick="togglePanel()" aria-label="Danh sách học viên" aria-pressed="true" title="Ẩn/hiện danh sách học viên"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></button>
+    <button class="icon-btn" onclick="openDrawer('gallery')" aria-label="Hình ảnh kỷ niệm" title="Hình ảnh kỷ niệm"><svg class="ic" aria-hidden="true"><use href="#i-img"/></svg></button>
+    <button class="icon-btn" onclick="openDrawer('books')" aria-label="Kiến thức" title="Kiến thức"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg></button>
+    <button class="icon-btn" onclick="centerOnUserLocation()" aria-label="Vị trí của tôi" title="Vị trí của tôi"><svg class="ic" aria-hidden="true"><use href="#i-locate"/></svg></button>
+</nav>
 
 <!-- ── TOP BAR ── -->
 <header id="topBar">
-    <div class="topbar-brand">🎓 K76.A11</div>
-    <div class="topbar-search">
-        <input type="text" id="searchInput" placeholder="Tìm tên học viên..." autocomplete="off"
+    <div class="topbar-brand"><span class="brand-mark" aria-hidden="true">K76</span><span class="sr-only">K76.A11</span></div>
+    <div class="topbar-search" role="search">
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" id="searchInput" placeholder="Tìm tên học viên…" aria-label="Tìm tên học viên" autocomplete="off" enterkeyhint="search"
             onkeydown="if(event.key==='Enter')searchMarkers()">
-        <button onclick="searchMarkers()">🔍</button>
     </div>
-    <div class="topbar-menu-btns">
-        <button onclick="openDrawer('gallery')" title="Hình ảnh kỷ niệm">📸</button>
-        <button onclick="openDrawer('books')" title="Kiến thức">📚</button>
-    </div>
-    <!-- Thay 2 link bên dưới bằng link Facebook và Zalo của lớp -->
-    <div class="topbar-socials">
-        <a class="social-btn fb" href="https://www.facebook.com/share/18PUgt9EvY/?mibextid=wwXIfr" target="_blank" rel="noopener" title="Facebook lớp K76.A11">
-            <svg viewBox="0 0 24 24" fill="white" width="17" height="17"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95C18.05 21.45 22 17.19 22 12z"/></svg>
-        </a>
-        <a class="social-btn zalo" href="https://zalo.me/g/fhprkh683" target="_blank" rel="noopener" title="Zalo lớp K76.A11">
-            <svg viewBox="0 0 48 48" fill="white" width="18" height="18"><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm7.5 27H16v-2.3l8.9-11.2H16.5V15H31v2.3l-8.9 11.2H31.5V31z"/></svg>
-        </a>
+    <div class="topbar-actions">
+        <button class="install-btn" id="installBtn" aria-label="Cài đặt ứng dụng"><svg class="ic" aria-hidden="true"><use href="#i-dl"/></svg><span class="lbl">Cài ứng dụng</span></button>
+        <button class="icon-btn" id="themeBtn" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện sáng/tối"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg></button>
     </div>
 </header>
 
-<!-- Search dropdown -->
 <div id="searchResultsDropdown"><ul id="searchResultsList"></ul></div>
-
-<!-- Panel toggle (desktop) -->
-<button id="panelToggle" onclick="togglePanel()" title="Ẩn/hiện danh sách">◀</button>
 
 <!-- ── LEFT PANEL ── -->
 <div id="leftPanelOverlay" onclick="closePanelMobile()"></div>
-<aside id="leftPanel">
+<aside id="leftPanel" aria-label="Danh sách học viên">
     <div class="panel-header">
-        <span class="panel-header-title">📋 Danh sách học viên</span>
+        <span class="panel-header-title">Học viên</span>
         <span class="panel-header-count" id="panelCount">0</span>
     </div>
     <div class="panel-search">
-        <input type="text" id="panelSearchInput" placeholder="Tìm trong danh sách..."
+        <input type="search" id="panelSearchInput" placeholder="Tìm trong danh sách…" aria-label="Tìm trong danh sách học viên" autocomplete="off"
             oninput="filterPanelList(this.value)">
     </div>
-    <div class="panel-list" id="panelList">
-        <div id="panelLoading">⏳ Đang tải dữ liệu...</div>
+    <div class="panel-list" id="panelList" aria-busy="true">
+        <div id="panelLoading" aria-label="Đang tải dữ liệu">
+            <div class="skeleton-row"><div class="skeleton av"></div><div style="flex:1"><div class="skeleton l1"></div><div class="skeleton l2"></div></div></div>
+            <div class="skeleton-row"><div class="skeleton av"></div><div style="flex:1"><div class="skeleton l1"></div><div class="skeleton l2"></div></div></div>
+            <div class="skeleton-row"><div class="skeleton av"></div><div style="flex:1"><div class="skeleton l1"></div><div class="skeleton l2"></div></div></div>
+            <div class="skeleton-row"><div class="skeleton av"></div><div style="flex:1"><div class="skeleton l1"></div><div class="skeleton l2"></div></div></div>
+        </div>
+    </div>
+    <div id="panelEmpty" class="panel-state" hidden>
+        <svg class="ic" aria-hidden="true"><use href="#i-search-x"/></svg>
+        <strong>Không tìm thấy học viên</strong>
+        Thử tên khác hoặc xóa từ khóa tìm kiếm.
+    </div>
+    <div id="panelError" class="panel-state" hidden role="alert">
+        <svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>
+        <strong>Không tải được dữ liệu</strong>
+        <span id="panelErrorMsg">Kiểm tra kết nối mạng rồi thử lại.</span>
+        <button type="button" onclick="loadData()">Thử lại</button>
+    </div>
+    <div class="panel-footer">
+        <span>Lớp K76.A11</span>
+        <a class="social-btn" href="https://www.facebook.com/share/18PUgt9EvY/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="Facebook lớp K76.A11">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95C18.05 21.45 22 17.19 22 12z"/></svg>
+        </a>
+        <a class="social-btn" href="https://zalo.me/g/fhprkh683" target="_blank" rel="noopener" aria-label="Zalo lớp K76.A11">
+            <svg viewBox="0 0 48 48" width="19" height="19" aria-hidden="true"><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm7.5 27H16v-2.3l8.9-11.2H16.5V15H31v2.3l-8.9 11.2H31.5V31z"/></svg>
+        </a>
     </div>
 </aside>
 
-<!-- Map -->
-<div id="map"></div>
+<div id="map" role="region" aria-label="Bản đồ học viên"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
-<!-- Toast -->
-<div id="toast"></div>
+<div id="iosInstallHint" role="note">
+    <svg class="ic" aria-hidden="true" style="color:var(--accent)"><use href="#i-share"/></svg>
+    <p><b>Cài ứng dụng:</b> bấm nút Chia sẻ rồi chọn <b>Thêm vào MH chính</b>.</p>
+    <button class="icon-btn" onclick="dismissIosHint()" aria-label="Đóng hướng dẫn cài đặt"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+</div>
 
-<!-- Transport mode picker (bottom sheet) -->
-<div id="transportPicker" class="modal-overlay" style="align-items:flex-end;padding:0;z-index:6500">
+<!-- Transport mode picker -->
+<div id="transportPicker" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tTitle">
     <div class="transport-sheet">
         <div class="t-handle"></div>
-        <p class="t-title">🗺️ Chọn phương tiện di chuyển</p>
+        <p class="t-title" id="tTitle">Chọn phương tiện di chuyển</p>
         <div class="t-opts">
-            <button class="t-opt" onclick="confirmTransport('motorcycle')">
-                <span class="t-icon">🏍️</span><span>Xe máy</span>
-            </button>
-            <button class="t-opt" onclick="confirmTransport('car')">
-                <span class="t-icon">🚗</span><span>Xe ôtô</span>
-            </button>
+            <button class="t-opt" onclick="confirmTransport('motorcycle')"><span class="t-icon" aria-hidden="true">🏍️</span><span>Xe máy</span></button>
+            <button class="t-opt" onclick="confirmTransport('car')"><span class="t-icon" aria-hidden="true">🚗</span><span>Xe ôtô</span></button>
         </div>
         <button class="t-cancel" onclick="closeTransportPicker()">Hủy</button>
     </div>
 </div>
 
-<!-- Bottom drawer -->
+<!-- Drawer -->
 <div id="drawerOverlay" onclick="closeDrawer()"></div>
-<div id="drawer">
+<div id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
     <div class="drawer-grip"></div>
     <div class="drawer-hdr">
         <span class="drawer-hdr-title" id="drawerTitle"></span>
-        <div style="display:flex;gap:6px;align-items:center">
-            <button id="drawerAddBtn" class="drawer-add-btn" onclick="openAddItemModal()" title="Thêm mới" style="display:none">＋</button>
-            <button class="modal-close" style="background:var(--bg);color:var(--text);border:1px solid var(--border)" onclick="closeDrawer()">✕</button>
+        <div class="drawer-hdr-actions">
+            <button id="drawerAddBtn" class="icon-btn drawer-add-btn" onclick="openAddItemModal()" aria-label="Thêm mới" title="Thêm mới" style="display:none"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+            <button class="modal-close" onclick="closeDrawer()" aria-label="Đóng"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
         </div>
     </div>
     <div id="drawerBody" class="drawer-body"></div>
 </div>
 
 <!-- Add item modal -->
-<div id="addItemModal" class="modal-overlay" role="dialog" aria-modal="true">
-    <div class="modal-card" style="max-width:400px">
+<div id="addItemModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="addItemTitle">
+    <div class="modal-card">
         <div class="modal-header">
             <span id="addItemTitle">Thêm mới</span>
-            <button class="modal-close" onclick="closeAddItemModal()">✕</button>
+            <button class="modal-close" onclick="closeAddItemModal()" aria-label="Đóng"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
         </div>
         <div class="modal-body" id="addItemBody"></div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeAddItemModal()">Hủy</button>
-            <button class="btn btn-primary" id="addItemBtn" onclick="submitAddItem()">💾 Lưu lên Google Sheet</button>
+            <button class="btn btn-primary" id="addItemBtn" onclick="submitAddItem()">Lưu lên Google Sheet</button>
         </div>
     </div>
 </div>
 
 <!-- Route info bar -->
-<div id="routeBar">
-    <span>🗺️</span>
+<div id="routeBar" role="status">
+    <svg class="ic" aria-hidden="true"><use href="#i-route"/></svg>
     <span id="routeBarText"></span>
-    <button class="rb-close" onclick="clearRoute()">✕ Xóa lộ trình</button>
+    <button class="rb-close" onclick="clearRoute()">Xóa lộ trình</button>
 </div>
 
 <!-- ── BOTTOM NAV (mobile) ── -->
-<nav id="bottomNav">
-    <button class="nav-btn" onclick="openPanelMobile()">
-        <span class="nav-icon">📋</span><span>Danh sách</span>
-    </button>
-    <button class="nav-btn" onclick="centerOnUserLocation()">
-        <span class="nav-icon">📍</span><span>Vị trí</span>
-    </button>
-    <button class="nav-btn" onclick="openDrawer('gallery')">
-        <span class="nav-icon">📸</span><span>Kỷ niệm</span>
-    </button>
-    <button class="nav-btn" onclick="openDrawer('books')">
-        <span class="nav-icon">📚</span><span>Kiến thức</span>
-    </button>
+<nav id="bottomNav" aria-label="Điều hướng chính">
+    <button class="nav-btn" onclick="openPanelMobile()"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><span>Danh sách</span></button>
+    <button class="nav-btn" onclick="centerOnUserLocation()"><svg class="ic" aria-hidden="true"><use href="#i-locate"/></svg><span>Vị trí</span></button>
+    <button class="nav-btn" onclick="openDrawer('gallery')"><svg class="ic" aria-hidden="true"><use href="#i-img"/></svg><span>Kỷ niệm</span></button>
+    <button class="nav-btn" onclick="openDrawer('books')"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg><span>Kiến thức</span></button>
 </nav>
 
 <!-- ── EDIT / ADD MARKER MODAL ── -->
-<div id="editModal" class="modal-overlay" role="dialog" aria-modal="true">
+<div id="editModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
     <div class="modal-card" id="editModalCard">
         <div class="modal-header">
             <span id="editModalTitle">Chỉnh sửa thông tin</span>
-            <button class="modal-close" onclick="closeEditModal()">✕</button>
+            <button class="modal-close" onclick="closeEditModal()" aria-label="Đóng"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
         </div>
         <div class="modal-body">
-            <div class="fg">
-                <label>ID học viên</label>
-                <input id="fId" type="text" placeholder="VD: K76.A11.001">
-            </div>
-            <div class="fg">
-                <label>Họ và tên <span style="color:var(--red)">*</span></label>
-                <input id="fName" type="text" placeholder="Nhập họ và tên">
-            </div>
-            <div class="fg">
-                <label>Chức vụ</label>
-                <input id="fTitle" type="text" placeholder="Chức vụ / học hàm">
-            </div>
-            <div class="fg">
-                <label>Cơ quan công tác</label>
-                <input id="fCompany" type="text" placeholder="Tên cơ quan">
-            </div>
-            <div class="fg">
-                <label>Địa chỉ nhà riêng</label>
-                <input id="fHomeAddress" type="text" placeholder="Địa chỉ nhà">
-            </div>
-            <div class="fg">
-                <label>Địa chỉ cơ quan</label>
-                <input id="fOfficeAddress" type="text" placeholder="Địa chỉ cơ quan">
-            </div>
+            <div class="fg"><label for="fId">ID học viên</label><input id="fId" type="text" placeholder="VD: K76.A11.001"></div>
+            <div class="fg"><label for="fName">Họ và tên <span class="req">*</span></label><input id="fName" type="text" placeholder="Nhập họ và tên"></div>
+            <div class="fg"><label for="fTitle">Chức vụ</label><input id="fTitle" type="text" placeholder="Chức vụ / học hàm"></div>
+            <div class="fg"><label for="fCompany">Cơ quan công tác</label><input id="fCompany" type="text" placeholder="Tên cơ quan"></div>
+            <div class="fg"><label for="fHomeAddress">Địa chỉ nhà riêng</label><input id="fHomeAddress" type="text" placeholder="Địa chỉ nhà"></div>
+            <div class="fg"><label for="fOfficeAddress">Địa chỉ cơ quan</label><input id="fOfficeAddress" type="text" placeholder="Địa chỉ cơ quan"></div>
             <div class="form-row">
-                <div class="fg"><label>Điện thoại 1</label><input id="fPhone1" type="tel" placeholder="SĐT 1"></div>
-                <div class="fg"><label>Điện thoại 2</label><input id="fPhone2" type="tel" placeholder="SĐT 2"></div>
+                <div class="fg"><label for="fPhone1">Điện thoại 1</label><input id="fPhone1" type="tel" placeholder="SĐT 1"></div>
+                <div class="fg"><label for="fPhone2">Điện thoại 2</label><input id="fPhone2" type="tel" placeholder="SĐT 2"></div>
             </div>
-            <div class="fg">
-                <label>Facebook</label>
-                <input id="fFacebook" type="text" placeholder="Link hoặc username Facebook">
-            </div>
-            <div class="fg">
-                <label>Trạng thái</label>
-                <input id="fStatus" type="text" placeholder="VD: Đang học, Nghỉ phép...">
-            </div>
+            <div class="fg"><label for="fFacebook">Facebook</label><input id="fFacebook" type="text" placeholder="Link hoặc username Facebook"></div>
+            <div class="fg"><label for="fStatus">Trạng thái</label><input id="fStatus" type="text" placeholder="VD: Đang học, Nghỉ phép..."></div>
             <div class="form-row">
-                <div class="fg"><label>Latitude</label><input id="fLat" type="text" placeholder="10.xxx"></div>
-                <div class="fg"><label>Longitude</label><input id="fLon" type="text" placeholder="106.xxx"></div>
+                <div class="fg"><label for="fLat">Latitude</label><input id="fLat" type="text" inputmode="decimal" placeholder="10.xxx"></div>
+                <div class="fg"><label for="fLon">Longitude</label><input id="fLon" type="text" inputmode="decimal" placeholder="106.xxx"></div>
             </div>
-            <div class="fg">
-                <button class="loc-btn" onclick="setEditLocation()">📍 Lấy vị trí GPS hiện tại</button>
-            </div>
+            <div class="fg"><button class="loc-btn" onclick="setEditLocation()"><svg class="ic" aria-hidden="true"><use href="#i-locate"/></svg>Lấy vị trí GPS hiện tại</button></div>
             <div id="fCoordsInfo" class="coords-info">Tọa độ: —</div>
-            <div class="fg" style="margin-top:8px">
-                <button class="cam-btn" onclick="document.getElementById('fImageInput').click()">📷 Chụp / chọn ảnh</button>
-                <input id="fImageInput" type="file" accept="image/*" capture="environment" style="display:none" onchange="handleEditImageFile(event)">
+            <div class="fg" style="margin-top:var(--space-2)">
+                <button class="cam-btn" onclick="document.getElementById('fImageInput').click()"><svg class="ic" aria-hidden="true"><use href="#i-img"/></svg>Chụp / chọn ảnh</button>
+                <input id="fImageInput" type="file" accept="image/*" capture="environment" style="display:none" aria-label="Chọn ảnh học viên" onchange="handleEditImageFile(event)">
             </div>
             <div class="img-preview" id="fImagePreview"></div>
             <div id="editStatus" class="status-msg"></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeEditModal()">Hủy</button>
-            <button class="btn btn-green" onclick="submitToGAS()" id="gasBtn">📡 Lưu & Đồng bộ</button>
-            <button class="btn btn-primary" onclick="saveLocalOnly()">💾 Lưu cục bộ</button>
+            <button class="btn btn-green" onclick="submitToGAS()" id="gasBtn">Lưu &amp; Đồng bộ</button>
+            <button class="btn btn-primary" onclick="saveLocalOnly()">Lưu cục bộ</button>
         </div>
     </div>
 </div>
 
 <!-- ── UPDATE LOCATION MODAL ── -->
-<div id="updateModal" class="modal-overlay" role="dialog" aria-modal="true">
-    <div class="modal-card" style="max-width:380px">
+<div id="updateModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="updateModalTitle">
+    <div class="modal-card">
         <div class="modal-header">
-            <span>📡 Cập nhật vị trí của tôi</span>
-            <button class="modal-close" onclick="document.getElementById('updateModal').classList.remove('open')">✕</button>
+            <span id="updateModalTitle">Cập nhật vị trí của tôi</span>
+            <button class="modal-close" onclick="document.getElementById('updateModal').classList.remove('open')" aria-label="Đóng"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
         </div>
         <div class="modal-body">
-            <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;line-height:1.5">
-                Cập nhật tọa độ của bạn lên Google Sheet qua Google Apps Script.
-            </p>
-            <div style="margin-bottom:12px">
-                <button class="cam-btn" id="testGasBtn" onclick="testGASConnection()" style="font-size:13px;font-weight:600">
-                    🔌 Kiểm tra kết nối Apps Script
-                </button>
-                <div id="gasTestResult" style="display:none;margin-top:8px;font-size:12px;padding:8px 12px;border-radius:8px;font-family:monospace;word-break:break-all"></div>
-            </div>
+            <p class="muted-text">Cập nhật tọa độ của bạn lên Google Sheet qua Google Apps Script.</p>
             <div class="fg">
-                <label>Tên / ID của bạn</label>
-                <input id="uName" type="text" placeholder="VD: Nguyễn Văn A hoặc K76.A11.001">
+                <button class="cam-btn" id="testGasBtn" onclick="testGASConnection()">Kiểm tra kết nối Apps Script</button>
+                <div id="gasTestResult" class="status-msg" style="font-family:ui-monospace,monospace;word-break:break-all"></div>
             </div>
+            <div class="fg"><label for="uName">Tên / ID của bạn</label><input id="uName" type="text" placeholder="VD: Nguyễn Văn A hoặc K76.A11.001"></div>
             <div class="fg">
-                <label>Tọa độ hiện tại</label>
-                <div id="uCoordsDisplay" style="padding:10px 12px;background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:8px;font-size:13px;color:var(--sky-dark);font-family:monospace">
-                    Chưa có — nhấn nút bên dưới
-                </div>
-                <button class="loc-btn" style="margin-top:8px" onclick="getGPSForUpdate()">📍 Lấy vị trí GPS</button>
+                <label for="uCoordsDisplay">Tọa độ hiện tại</label>
+                <div id="uCoordsDisplay" class="mono-box" role="status">Chưa có — nhấn nút bên dưới</div>
+                <button class="loc-btn" style="margin-top:var(--space-2)" onclick="getGPSForUpdate()"><svg class="ic" aria-hidden="true"><use href="#i-locate"/></svg>Lấy vị trí GPS</button>
             </div>
             <div id="updateStatus" class="status-msg"></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="document.getElementById('updateModal').classList.remove('open')">Hủy</button>
-            <button class="btn btn-primary" id="uSubmitBtn" onclick="submitLocationUpdate()">📡 Cập nhật</button>
+            <button class="btn btn-primary" id="uSubmitBtn" onclick="submitLocationUpdate()">Cập nhật</button>
         </div>
     </div>
 </div>
 
 <!-- Scripts -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/markercluster/leaflet.markercluster.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 // ── CONFIG ──
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWWGTRtkbcls__sB1VlAcSJZTNvDigroNMJgqmce-1Ug3j181zS8VwyvZZb6jCs_W1tbFSq17YNK3B/pub?output=csv&t=' + Date.now();
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbytFnvL1vKpjwolYscRCnbmOf-CinzS2YDGRDgDTwYRdQxNzUDR19p71EWB24ip2Qr_EA/exec';
+// Token công khai Mapbox (pk.…) — dán vào đây; nên khoá theo URL neo-era.github.io trong tài khoản Mapbox.
+const MAPBOX_TOKEN = window.K76_MAPBOX_TOKEN || '';
+const GAS_URL ='https://script.google.com/macros/s/AKfycbytFnvL1vKpjwolYscRCnbmOf-CinzS2YDGRDgDTwYRdQxNzUDR19p71EWB24ip2Qr_EA/exec';
 
 // ── STATE ──
 let map;
@@ -819,6 +747,9 @@ let userLatLon = null;
 let routeLayer = null;
 let pendingRouteDest = null;
 let currentDrawerSection = '';
+
+// ── ICONS ──
+function ic(name) { return `<svg class="ic" aria-hidden="true"><use href="#i-${name}"/></svg>`; }
 
 // ── TOAST ──
 let toastTimer;
@@ -937,30 +868,30 @@ function buildPopupHTML(row, idx) {
     const p = parseRow(row);
     const imgSrc = resolveImagePath(p.image);
     const avatar = imgSrc
-        ? `<img class="popup-avatar" src="${imgSrc}" alt="${p.name}" onerror="this.style.display='none'">`
-        : `<div class="popup-avatar-placeholder">👤</div>`;
+        ? `<img class="popup-avatar" src="${imgSrc}" alt="${p.name}" onerror="this.outerHTML='<div class=\\'popup-avatar-placeholder\\'>${ic('user').replace(/"/g, '&quot;')}</div>'">`
+        : `<div class="popup-avatar-placeholder">${ic('user')}</div>`;
     const coordsStr = isFinite(p.lat) && isFinite(p.lon)
         ? `${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}`
         : 'Chưa có tọa độ';
     const rows = [];
-    if (p.status)        rows.push(`<div class="popup-row"><span class="pi">📋</span><span class="pv">${p.status}</span></div>`);
-    if (p.homeAddress)   rows.push(`<div class="popup-row"><span class="pi">🏠</span><span class="pv">${p.homeAddress}</span></div>`);
-    if (p.officeAddress) rows.push(`<div class="popup-row"><span class="pi">🏢</span><span class="pv">${p.officeAddress}</span></div>`);
-    if (p.company)       rows.push(`<div class="popup-row"><span class="pi">🏛</span><span class="pv">${p.company}</span></div>`);
+    if (p.status)        rows.push(`<div class="popup-row"><span class="pi">${ic('info')}</span><span class="pv">${p.status}</span></div>`);
+    if (p.homeAddress)   rows.push(`<div class="popup-row"><span class="pi">${ic('home')}</span><span class="pv">${p.homeAddress}</span></div>`);
+    if (p.officeAddress) rows.push(`<div class="popup-row"><span class="pi">${ic('building')}</span><span class="pv">${p.officeAddress}</span></div>`);
+    if (p.company)       rows.push(`<div class="popup-row"><span class="pi">${ic('building')}</span><span class="pv">${p.company}</span></div>`);
     if (p.phone1 || p.phone2) {
-        const ph = [p.phone1, p.phone2].filter(Boolean).map(n => `<a href="tel:${n}">${n}</a>`).join(' &nbsp;|&nbsp; ');
-        rows.push(`<div class="popup-row"><span class="pi">📞</span><span class="pv">${ph}</span></div>`);
+        const ph = [p.phone1, p.phone2].filter(Boolean).map(n => `<a href="tel:${n}">${n}</a>`).join(' &nbsp;·&nbsp; ');
+        rows.push(`<div class="popup-row"><span class="pi">${ic('phone')}</span><span class="pv">${ph}</span></div>`);
     }
     if (p.facebook) {
         const fbUrl = /^https?:\/\//.test(p.facebook) ? p.facebook : `https://facebook.com/${p.facebook}`;
-        rows.push(`<div class="popup-row"><span class="pi">📘</span><span class="pv"><a href="${fbUrl}" target="_blank" rel="noopener">${p.facebook}</a></span></div>`);
+        rows.push(`<div class="popup-row"><span class="pi">${ic('link')}</span><span class="pv"><a href="${fbUrl}" target="_blank" rel="noopener">${p.facebook}</a></span></div>`);
     }
     const escapedName = (p.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const editBtn = Number.isInteger(idx)
-        ? `<button class="popup-action-btn" onclick="openEditModal(${idx})">✏️ Chỉnh sửa</button>`
+        ? `<button class="popup-action-btn" onclick="openEditModal(${idx})">${ic('edit')}Chỉnh sửa</button>`
         : '';
     const routeBtn = (isFinite(p.lat) && isFinite(p.lon))
-        ? `<button class="popup-action-btn primary" onclick="openTransportPicker(${p.lat},${p.lon},'${escapedName}')">🗺️ Chỉ đường</button>`
+        ? `<button class="popup-action-btn primary" onclick="openTransportPicker(${p.lat},${p.lon},'${escapedName}')">${ic('route')}Chỉ đường</button>`
         : '';
     return `<div class="popup-card">
         <div class="popup-header">
@@ -973,7 +904,7 @@ function buildPopupHTML(row, idx) {
         </div>
         <div class="popup-body">
             ${rows.join('')}
-            <div class="popup-coords">📍 ${coordsStr}</div>
+            <div class="popup-coords">${coordsStr}</div>
         </div>
         <div class="popup-actions">
             ${editBtn}
@@ -993,10 +924,26 @@ function buildIcon(p) {
 
 // ── MAP INIT ──
 function initMap() {
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 22, attribution: '© OpenStreetMap' });
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 22, className: 'tiles-osm', attribution: '© OpenStreetMap' });
     const sat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22, subdomains: ['mt0','mt1','mt2','mt3'], attribution: '© Google' });
-    map = L.map('map', { center: [10.762622, 106.660172], zoom: 13, maxZoom: 22, layers: [osm] });
-    L.control.layers({ 'OpenStreetMap': osm, 'Vệ tinh': sat }, {}, { position: 'topright' }).addTo(map);
+    const gOpts = { maxZoom: 22, maxNativeZoom: 21, subdomains: ['mt0','mt1','mt2','mt3'], attribution: '© Google' };
+    const gmap = L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=vi&x={x}&y={y}&z={z}', gOpts);
+    const ghybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&hl=vi&x={x}&y={y}&z={z}', gOpts);
+    const baseLayers = {};
+    let defaultLayer = osm;
+    if (MAPBOX_TOKEN) {
+        const mapbox = L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=${MAPBOX_TOKEN}`, {
+            maxZoom: 22, maxNativeZoom: 22, attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © OpenStreetMap'
+        });
+        baseLayers['Mapbox Streets'] = mapbox;
+        defaultLayer = mapbox;
+    }
+    baseLayers['OpenStreetMap'] = osm;
+    baseLayers['Google Maps'] = gmap;
+    baseLayers['Vệ tinh'] = sat;
+    baseLayers['Vệ tinh + nhãn'] = ghybrid;
+    map = L.map('map', { center: [10.762622, 106.660172], zoom: 13, maxZoom: 22, layers: [defaultLayer] });
+    L.control.layers(baseLayers, {}, { position: 'topright' }).addTo(map);
     map.addLayer(markersCluster);
     map.on('click', e => {
         document.getElementById('searchResultsDropdown').style.display = 'none';
@@ -1017,7 +964,7 @@ function addRowToMap(row, idx) {
     let labelMarker = null;
     if (p.name) {
         labelMarker = L.marker([p.lat, p.lon], {
-            icon: L.divIcon({ className: 'custom-label', html: `<div>${p.name}</div>`, iconSize: [120, 20], iconAnchor: [60, 28] }),
+            icon: L.divIcon({ className: 'custom-label', html: `<div>${p.name}</div>`, iconSize: [240, 20], iconAnchor: [120, 48] }),
             interactive: false
         }).addTo(map);
     }
@@ -1043,7 +990,7 @@ function buildPanelList(data) {
     count.textContent = data.length;
     list.innerHTML = '';
     if (data.length === 0) {
-        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">Không có dữ liệu</div>';
+        list.innerHTML = '<div class="panel-state"><strong>Chưa có dữ liệu</strong>Danh sách học viên đang trống.</div>';
         return;
     }
     const frag = document.createDocumentFragment();
@@ -1054,17 +1001,20 @@ function buildPanelList(data) {
         const div = document.createElement('div');
         div.className = 'panel-item';
         div.dataset.idx = origIdx;
+        div.setAttribute('role', 'button');
+        div.tabIndex = 0;
+        div.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); div.click(); } });
         if (imgSrc) {
-            div.innerHTML = `<img class="panel-avatar" src="${imgSrc}" alt="${p.name}" onerror="this.outerHTML='<div class=\\'panel-avatar-placeholder\\'>👤</div>'">`;
+            div.innerHTML = `<img class="panel-avatar" src="${imgSrc}" alt="${p.name}" onerror="this.outerHTML='<div class=\\'panel-avatar-placeholder\\'>${ic('user').replace(/"/g, '&quot;')}</div>'">`;
         } else {
-            div.innerHTML = `<div class="panel-avatar-placeholder">👤</div>`;
+            div.innerHTML = `<div class="panel-avatar-placeholder">${ic('user')}</div>`;
         }
         div.innerHTML += `
             <div class="panel-item-info">
                 <div class="panel-item-name">${p.name || '(Chưa có tên)'}</div>
                 <div class="panel-item-sub">${p.company || p.officeAddress || p.id || ''}</div>
             </div>
-            ${!hasCoords ? '<span class="panel-no-coords" title="Chưa có tọa độ">⚠</span>' : ''}
+            ${!hasCoords ? `<span class="panel-no-coords" title="Chưa có tọa độ" role="img" aria-label="Chưa có tọa độ">${ic('alert')}</span>` : ''}
         `;
         div.addEventListener('click', () => {
             document.querySelectorAll('.panel-item').forEach(el => el.classList.remove('active'));
@@ -1081,6 +1031,7 @@ function buildPanelList(data) {
         frag.appendChild(div);
     });
     list.appendChild(frag);
+    list.setAttribute('aria-busy', 'false');
 }
 
 function filterPanelList(q) {
@@ -1091,26 +1042,18 @@ function filterPanelList(q) {
         const sub  = normalizeText(el.querySelector('.panel-item-sub')?.textContent || '');
         el.style.display = (!norm || name.includes(norm) || sub.includes(norm)) ? '' : 'none';
     });
+    const anyVisible = [...items].some(el => el.style.display !== 'none');
+    document.getElementById('panelEmpty').hidden = anyVisible || items.length === 0;
 }
 
 // ── PANEL TOGGLE ──
 function togglePanel() {
     panelVisible = !panelVisible;
-    const panel = document.getElementById('leftPanel');
-    const toggle = document.getElementById('panelToggle');
-    const mapEl = document.getElementById('map');
-    if (panelVisible) {
-        panel.classList.remove('hidden');
-        mapEl.classList.remove('panel-hidden');
-        toggle.textContent = '◀';
-        toggle.classList.remove('panel-hidden');
-    } else {
-        panel.classList.add('hidden');
-        mapEl.classList.add('panel-hidden');
-        toggle.textContent = '▶';
-        toggle.classList.add('panel-hidden');
-    }
-    setTimeout(() => map.invalidateSize(), 350);
+    document.body.classList.toggle('panel-collapsed', !panelVisible);
+    const railBtn = document.getElementById('railPanelBtn');
+    railBtn.classList.toggle('on', panelVisible);
+    railBtn.setAttribute('aria-pressed', String(panelVisible));
+    setTimeout(() => map.invalidateSize(), 300);
 }
 
 function openPanelMobile() {
@@ -1125,11 +1068,10 @@ function closePanelMobile() {
 // ── DATA LOADING ──
 async function loadData() {
     if (location.protocol === 'file:') {
-        document.getElementById('panelLoading').innerHTML =
-            '⚠️ Mở file trực tiếp từ máy tính — fetch bị chặn.<br>Hãy dùng <b>Live Server</b> hoặc deploy lên <b>GitHub Pages</b>.';
+        showPanelError('Mở file trực tiếp từ máy tính nên trình duyệt chặn tải dữ liệu. Hãy dùng Live Server hoặc mở bản GitHub Pages.');
         return;
     }
-    document.getElementById('panelLoading').textContent = '⏳ Đang tải từ Google Sheet...';
+    showPanelLoading();
     try {
         const res = await fetch(SHEET_CSV_URL);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1141,7 +1083,11 @@ async function loadData() {
     } catch(e) {
         console.warn('Google Sheet load failed:', e.message);
         showToast('Không tải được Google Sheet, thử file cục bộ...');
-        try { await loadLocalExcel(); } catch(e2) { showToast('Không tải được dữ liệu: ' + e2.message); }
+        try { await loadLocalExcel(); } catch(e2) { console.warn('Local fallback failed:', e2.message); }
+    }
+    if (loadedData.length === 0) {
+        showPanelError('Không kết nối được Google Sheet. Kiểm tra mạng rồi thử lại.');
+        return;
     }
     finishLoading();
 }
@@ -1153,6 +1099,23 @@ async function loadLocalExcel() {
     const wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
     const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
     loadedData = data.filter(r => Object.values(r).some(v => v !== ''));
+}
+
+function showPanelLoading() {
+    document.getElementById('panelError').hidden = true;
+    document.getElementById('panelEmpty').hidden = true;
+    const list = document.getElementById('panelList');
+    list.setAttribute('aria-busy', 'true');
+    if (!document.getElementById('panelLoading')) {
+        list.innerHTML = '<div id="panelLoading">' + '<div class="skeleton-row"><div class="skeleton av"></div><div style="flex:1"><div class="skeleton l1"></div><div class="skeleton l2"></div></div></div>'.repeat(4) + '</div>';
+    }
+}
+function showPanelError(msg) {
+    const list = document.getElementById('panelList');
+    list.innerHTML = '';
+    list.setAttribute('aria-busy', 'false');
+    document.getElementById('panelErrorMsg').textContent = msg;
+    document.getElementById('panelError').hidden = false;
 }
 
 function finishLoading() {
@@ -1191,7 +1154,7 @@ function searchMarkers() {
         const li = document.createElement('li');
         const a = document.createElement('a');
         a.href = '#';
-        a.innerHTML = `<span>📍</span>${m.name} <span style="color:var(--text-muted);font-size:11px;margin-left:4px">${m.lat.toFixed(4)}, ${m.lon.toFixed(4)}</span>`;
+        a.innerHTML = `${ic('pin')}<span>${m.name}</span>`;
         a.onclick = ev => {
             ev.preventDefault();
             map.setView([m.lat, m.lon], 17);
@@ -1318,7 +1281,7 @@ function applyRowLocally(row) {
             markersCluster.addLayer(entry.marker);
             if (entry.labelMarker) {
                 entry.labelMarker.setLatLng([p.lat, p.lon]);
-                entry.labelMarker.setIcon(L.divIcon({ className:'custom-label', html:`<div>${p.name}</div>`, iconSize:[120,20], iconAnchor:[60,28] }));
+                entry.labelMarker.setIcon(L.divIcon({ className:'custom-label', html:`<div>${p.name}</div>`, iconSize: [240, 20], iconAnchor: [120, 48] }));
             }
             map.setView([p.lat, p.lon], 17);
             entry.marker.openPopup();
@@ -1418,7 +1381,7 @@ function updateAddBtn() {
     const lbl = document.getElementById('addMarkerLabel');
     if (!btn) return;
     if (addMarkerMode) {
-        btn.style.color = 'var(--red)';
+        btn.style.color = 'var(--danger)';
         if (icon) icon.textContent = '🛑';
         if (lbl) lbl.textContent = 'Dừng';
     } else {
@@ -1435,8 +1398,7 @@ async function testGASConnection() {
     btn.disabled = true;
     btn.textContent = '⏳ Đang kiểm tra...';
     result.style.display = 'block';
-    result.style.background = '#f1f5f9';
-    result.style.color = '#64748b';
+    result.className = 'status-msg ok';
     result.textContent = 'Đang gửi GET request tới Apps Script...';
     try {
         const start = Date.now();
@@ -1446,15 +1408,13 @@ async function testGASConnection() {
         const text = await res.text();
         let parsed;
         try { parsed = JSON.parse(text); } catch(e) { parsed = { raw: text }; }
-        result.style.background = '#ecfdf5';
-        result.style.color = '#065f46';
+        result.className = 'status-msg ok';
         result.innerHTML = `✅ <b>Kết nối thành công</b> (${elapsed}ms)<br>` +
             `URL: <span style="opacity:0.7">${GAS_URL.slice(0,60)}…</span><br>` +
             `Phản hồi: ${JSON.stringify(parsed)}`;
         showToast(`✅ Apps Script hoạt động (${elapsed}ms)`);
     } catch(e) {
-        result.style.background = '#fef2f2';
-        result.style.color = '#991b1b';
+        result.className = 'status-msg err';
         result.innerHTML = `❌ <b>Kết nối thất bại</b><br>` +
             `Lỗi: ${e.message}<br><br>` +
             `<b>Kiểm tra:</b><br>` +
@@ -1646,9 +1606,9 @@ const DATA_HISTORY = [
 function openDrawer(section) {
     currentDrawerSection = section;
     const cfg = {
-        gallery: { title: '📸 Hình ảnh kỷ niệm', render: renderGallery },
-        books:   { title: '📚 Kiến thức',         render: renderBooks   },
-        history: { title: '🕐 Lịch sử cập nhật',  render: renderHistory },
+        gallery: { title: 'Hình ảnh kỷ niệm', render: renderGallery },
+        books:   { title: 'Kiến thức',         render: renderBooks   },
+        history: { title: 'Lịch sử cập nhật',  render: renderHistory },
     };
     const c = cfg[section]; if (!c) return;
     document.getElementById('drawerTitle').textContent = c.title;
@@ -1656,6 +1616,7 @@ function openDrawer(section) {
     document.getElementById('drawerAddBtn').style.display = (section !== 'history') ? 'flex' : 'none';
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('drawer').classList.add('open');
+    closePanelMobile();
 }
 function closeDrawer() {
     document.getElementById('drawerOverlay').classList.remove('open');
@@ -1665,15 +1626,15 @@ function closeDrawer() {
 // ── ADD ITEM MODAL ──
 function openAddItemModal() {
     const isGallery = currentDrawerSection === 'gallery';
-    document.getElementById('addItemTitle').textContent = isGallery ? '📸 Thêm ảnh / video' : '📚 Thêm tài liệu';
+    document.getElementById('addItemTitle').textContent = isGallery ? 'Thêm ảnh / video' : 'Thêm tài liệu';
     document.getElementById('addItemBody').innerHTML = isGallery ? `
         <div class="fg">
-            <label>Đường link <span style="color:var(--red)">*</span></label>
+            <label>Đường link <span style="color:var(--danger)">*</span></label>
             <input id="aiUrl" type="url" placeholder="https://drive.google.com/... hoặc youtube.com/..." oninput="previewGalleryUrl()">
             <div id="aiUrlPreview" class="url-preview"></div>
         </div>
         <div class="fg">
-            <label>Tiêu đề <span style="color:var(--red)">*</span></label>
+            <label>Tiêu đề <span style="color:var(--danger)">*</span></label>
             <input id="aiTitle" type="text" placeholder="VD: Album lễ khai giảng">
         </div>
         <div class="fg">
@@ -1683,11 +1644,11 @@ function openAddItemModal() {
         <div id="addItemStatus" class="status-msg"></div>
     ` : `
         <div class="fg">
-            <label>Tiêu đề <span style="color:var(--red)">*</span></label>
+            <label>Tiêu đề <span style="color:var(--danger)">*</span></label>
             <input id="aiTitle" type="text" placeholder="VD: Giáo trình Triết học Mác-Lênin">
         </div>
         <div class="fg">
-            <label>Đường link <span style="color:var(--red)">*</span></label>
+            <label>Đường link <span style="color:var(--danger)">*</span></label>
             <input id="aiUrl" type="url" placeholder="https://drive.google.com/...">
         </div>
         <div class="fg">
@@ -1700,12 +1661,13 @@ function openAddItemModal() {
         </div>
         <div class="fg">
             <label>Icon (emoji)</label>
-            <input id="aiIcon" type="text" placeholder="📗" style="max-width:90px">
+            <input id="aiIcon" type="text" placeholder="📗" style="max-width:120px">
         </div>
         <div id="addItemStatus" class="status-msg"></div>
     `;
     const btn = document.getElementById('addItemBtn');
-    btn.disabled = false; btn.textContent = '💾 Lưu lên Google Sheet';
+    btn.disabled = false; btn.textContent = 'Lưu lên Google Sheet';
+    linkLabels(document.getElementById('addItemBody'));
     document.getElementById('addItemModal').classList.add('open');
 }
 
@@ -1753,7 +1715,7 @@ async function submitAddItem() {
         };
     }
 
-    btn.disabled = true; btn.textContent = '⏳ Đang lưu...';
+    btn.disabled = true; btn.textContent = 'Đang lưu…';
     statusEl.className = 'status-msg ok'; statusEl.textContent = 'Đang kết nối Google Sheet...';
     try {
         const action = isGallery ? 'addGallery' : 'addBook';
@@ -1768,7 +1730,7 @@ async function submitAddItem() {
     } catch(e) {
         statusEl.className = 'status-msg err';
         statusEl.textContent = '❌ Lỗi: ' + e.message;
-        btn.disabled = false; btn.textContent = '💾 Lưu lên Google Sheet';
+        btn.disabled = false; btn.textContent = 'Lưu lên Google Sheet';
     }
 }
 
@@ -1790,7 +1752,7 @@ async function loadDrawerData() {
 
 function renderGallery() {
     if (!DATA_GALLERY.length)
-        return '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:24px 0">Chưa có nội dung.<br>Thêm link vào <b>DATA_GALLERY</b> trong mã nguồn.</p>';
+        return '<p class="empty-note">Chưa có ảnh hay video nào.<br>Bấm nút <b>+</b> để thêm đường link đầu tiên.</p>';
     const cards = DATA_GALLERY.map(item => {
         const thumb = buildGalleryThumb(item);
         const sub = item.desc || (item.type === 'youtube' ? 'YouTube' : item.type === 'drive' ? 'Google Drive' : 'Xem');
@@ -1812,7 +1774,7 @@ function buildGalleryThumb(item) {
 
 function renderBooks() {
     if (!DATA_BOOKS.length)
-        return '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:24px 0">Chưa có nội dung.<br>Thêm sách vào <b>DATA_BOOKS</b> trong mã nguồn.</p>';
+        return '<p class="empty-note">Chưa có tài liệu nào.<br>Bấm nút <b>+</b> để thêm tài liệu đầu tiên.</p>';
     return `<div class="book-list">${DATA_BOOKS.map(b => `
         <a class="book-card" href="${b.url}" target="_blank" rel="noopener">
             <span class="bk-icon">${b.icon || '📖'}</span>
@@ -1828,8 +1790,90 @@ function renderHistory() {
         </div>`).join('')}</div>`;
 }
 
+// ── LABELS ──
+function linkLabels(root) {
+    root.querySelectorAll('.fg > label:not([for])').forEach(l => {
+        const input = l.parentElement.querySelector('input, textarea, select');
+        if (input && input.id) l.htmlFor = input.id;
+    });
+}
+
+// ── ESC ĐÓNG LỚP PHỦ ──
+document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const modal = [...document.querySelectorAll('.modal-overlay.open')].pop();
+    if (modal) {
+        if (modal.id === 'editModal') closeEditModal();
+        else if (modal.id === 'transportPicker') closeTransportPicker();
+        else if (modal.id === 'addItemModal') closeAddItemModal();
+        else modal.classList.remove('open');
+    } else if (document.getElementById('drawer').classList.contains('open')) closeDrawer();
+    else if (document.getElementById('leftPanel').classList.contains('open')) closePanelMobile();
+});
+
+// ── THEME ──
+function applyTheme(t, persist) {
+    document.documentElement.dataset.theme = t;
+    document.querySelector('meta[name="theme-color"]').content = t === 'light' ? '#fbfaf7' : '#0a0b0d';
+    document.querySelector('#themeBtn use').setAttribute('href', t === 'light' ? '#i-moon' : '#i-sun');
+    document.getElementById('themeBtn').setAttribute('aria-label', t === 'light' ? 'Chuyển sang giao diện tối' : 'Chuyển sang giao diện sáng');
+    if (persist) { try { localStorage.setItem('k76-theme', t); } catch (_) {} }
+}
+document.getElementById('themeBtn').addEventListener('click', () => {
+    applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light', true);
+});
+applyTheme(document.documentElement.dataset.theme, false);
+matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+    let saved = null; try { saved = localStorage.getItem('k76-theme'); } catch (_) {}
+    if (!saved) applyTheme(e.matches ? 'light' : 'dark', false);
+});
+
+// ── PWA: cài đặt + service worker ──
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstall = e;
+    document.getElementById('installBtn').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredInstall) return;
+    deferredInstall.prompt();
+    try { await deferredInstall.userChoice; } catch (_) {}
+    deferredInstall = null;
+    document.getElementById('installBtn').classList.remove('show');
+});
+window.addEventListener('appinstalled', () => {
+    document.getElementById('installBtn').classList.remove('show');
+    showToast('Đã cài đặt ứng dụng');
+});
+
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+function dismissIosHint() {
+    document.getElementById('iosInstallHint').classList.remove('show');
+    try { localStorage.setItem('k76-ios-hint', '1'); } catch (_) {}
+}
+(function showIosHint() {
+    let seen = false; try { seen = localStorage.getItem('k76-ios-hint') === '1'; } catch (_) {}
+    if (isIOS && !isStandalone && !seen) document.getElementById('iosInstallHint').classList.add('show');
+})();
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            reg.addEventListener('updatefound', () => {
+                const w = reg.installing;
+                if (w) w.addEventListener('statechange', () => {
+                    if (w.state === 'installed' && navigator.serviceWorker.controller) showToast('Có phiên bản mới — tải lại trang để cập nhật', 6000);
+                });
+            });
+        }).catch(err => console.warn('SW register failed:', err.message));
+    });
+}
+
 // ── INIT ──
 window.addEventListener('load', () => {
+    linkLabels(document);
     initMap();
     loadData();
     loadDrawerData();

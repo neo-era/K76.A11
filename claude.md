@@ -156,3 +156,20 @@ const SHEET_NAME = 'Sheet1';                     // tab học viên
    - Execute as: **Me**
    - Who has access: **Anyone**
 5. Copy URL `/exec` (không dùng `/dev`) → điền vào `GAS_URL` trong `index.html`
+
+---
+
+## Giao diện v2 (phương án B) + PWA + test
+
+Chi tiết thiết kế: `docs/UI-REDESIGN.md` (mockup: `docs/ui-mockups.html`).
+
+- **Theme:** dark/light theo hệ thống + nút đổi (`#themeBtn`, nhớ trong `localStorage` khóa `k76-theme`). Toàn bộ màu/khoảng cách/bo góc là token ở `:root` đầu `<style>`; không rải hex trong CSS.
+- **Bố cục:** desktop = rail 64px + panel danh sách + top bar; mobile (≤768px) = top bar + bottom nav, panel trượt từ trái. Ẩn/hiện panel desktop bằng `body.panel-collapsed`.
+- **Nền bản đồ:** Mapbox Streets mặc định nếu có `MAPBOX_TOKEN` (token công khai `pk.`, dán trong `index.html`); chưa có token → OSM. Filter dark chỉ áp lên lớp OSM (class `tiles-osm`).
+- **Thư viện:** Leaflet + MarkerCluster đặt trong `vendor/` (để offline). `xlsx` vẫn lấy từ CDN (`defer`, chỉ dùng cho file dự phòng).
+- **PWA:** `manifest.webmanifest`, `sw.js`, `icons/` (tạo từ `icons/icon.svg`). Đổi `CACHE_VERSION` trong `sw.js` mỗi khi sửa file shell (vendor, icons, manifest) để máy người dùng nhận bản mới. SW không cache lệnh ghi GAS; CSV Google Sheet cache theo URL đã bỏ tham số `t`.
+- **Test:** `npm install` rồi `npm test` (Playwright, dùng Chrome cài sẵn, mạng ngoài được mock). Bắt buộc chạy trước khi đẩy lên `main`.
+
+### Nợ kỹ thuật đã biết
+- Dữ liệu từ Google Sheet chèn thẳng vào `innerHTML` (popup, danh sách, nhãn) chưa được escape; cột Facebook chưa chặn `javascript:`. Có từ bản cũ.
+- Modal/drawer chưa có focus trap và chưa trả focus khi đóng.
